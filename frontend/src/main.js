@@ -1,34 +1,48 @@
 import { BACKEND_PORT } from "./config.js";
 import { fileToDataUrl } from "./helpers.js";
 
-const apiCall = (path, method, body) => {
-    return new Promise((resolve, reject) => {
-        const options = {
-            method: method,
-            headers: {
-                "Content-type": "application/json",
-            },
-        };
-        if (method === "GET") {
-            // Come back to this
-        } else {
-            options.body = JSON.stringify(body);
-        }
-        if (localStorage.getItem("token")) {
-            options.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
-        }
+const apiCall = (path, method, body, headers = {}) => {
+    console.log("API call:", path, method, body);
 
-        fetch("http://localhost:5005/" + path, options)
-            .then((response) => response.json())
+    const options = {
+        method: method,
+        headers: {
+            "Content-type": "application/json",
+            ...headers, // Merge custom headers
+        },
+    };
+
+    if (method === "GET" && body) {
+        // Convert body object to query string for GET requests
+        const queryString = new URLSearchParams(body).toString();
+        path += "?" + queryString;
+    } else if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    if (localStorage.getItem("token")) {
+        options.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+    }
+
+    return new Promise((resolve, reject) => {
+        fetch(`http://localhost:${BACKEND_PORT}/` + path, options)
+            .then((response) => {
+                return response.json();
+            })
             .then((data) => {
                 if (data.error) {
                     alert(data.error);
                 } else {
                     resolve(data);
                 }
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error);
+                reject(error);
             });
     });
 };
+
 
 const populateFeed = () => {
     apiCall("job/feed?start=0", "GET", {}).then((data) => {
@@ -61,7 +75,8 @@ document.getElementById("create-job-fake").addEventListener("click", () => {
     apiCall("job", "POST", payload);
 });
 
-document.getElementById("register-button").addEventListener("click", () => {
+document.getElementById("register-button").addEventListener("click", (event) => {
+    event.preventDefault();
     const password = document.getElementById("register-password").value;
     const passwordConfirm = document.getElementById("register-password-confirm").value;
     console.log(password, passwordConfirm);
@@ -79,7 +94,8 @@ document.getElementById("register-button").addEventListener("click", () => {
     });
 });
 
-document.getElementById("login-button").addEventListener("click", () => {
+document.getElementById("login-button").addEventListener("click", (event) => {
+    event.preventDefault();
     const payload = {
         email: document.getElementById("login-email").value,
         password: document.getElementById("login-password").value,
@@ -115,7 +131,7 @@ document.getElementById("logout").addEventListener("click", () => {
     localStorage.removeItem("token");
 });
 
-// MAIN
+//////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
     show("section-logged-in");
