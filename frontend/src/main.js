@@ -1,24 +1,30 @@
 import { BACKEND_PORT } from "./config.js";
 import { fileToDataUrl } from "./helpers.js";
 
-const apiCall = (path, method, body) => {
+const apiCall = (path, method, body, headers = {}) => {
     console.log("API call:", path, method, body);
-    return new Promise((resolve, reject) => {
-        const options = {
-            method: method,
-            headers: {
-                "Content-type": "application/json",
-            },
-        };
-        if (method === "GET") {
-            // Come back to this
-        } else {
-            options.body = JSON.stringify(body);
-        }
-        if (localStorage.getItem("token")) {
-            options.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
-        }
 
+    const options = {
+        method: method,
+        headers: {
+            "Content-type": "application/json",
+            ...headers, // Merge custom headers
+        },
+    };
+
+    if (method === "GET" && body) {
+        // Convert body object to query string for GET requests
+        const queryString = new URLSearchParams(body).toString();
+        path += "?" + queryString;
+    } else if (body) {
+        options.body = JSON.stringify(body);
+    }
+
+    if (localStorage.getItem("token")) {
+        options.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+    }
+
+    return new Promise((resolve, reject) => {
         fetch(`http://localhost:${BACKEND_PORT}/` + path, options)
             .then((response) => {
                 return response.json();
@@ -29,9 +35,14 @@ const apiCall = (path, method, body) => {
                 } else {
                     resolve(data);
                 }
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error);
+                reject(error);
             });
     });
 };
+
 
 const populateFeed = () => {
     apiCall("job/feed?start=0", "GET", {}).then((data) => {
