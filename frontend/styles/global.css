@@ -1,9 +1,6 @@
 /* base styles, feel free to edit */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial;
+* {
+    font-family: "Nunito", sans-serif;
 }
 
 .hide {
@@ -11,5 +8,97 @@ html, body {
 }
 
 .nav-item:hover {
-    cursor: pointer;
+	cursor: pointer;
+}
+
+/* Register CSS */
+#page-register form {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#page-register .form-group {
+    width: 300px;
+}
+
+#page-register label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#page-register input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+#page-register #register-button {
+    width: 100px;
+}
+
+/* Login CSS */
+#page-login form {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#page-login .form-group {
+    width: 300px;
+}
+
+#page-login label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#page-login input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+#page-login #login-button {
+    width: 100px;
+}
+
+/* Logged In Page CSS */
+#section-logged-in .container {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+  
+/* Footer CSS */
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    color: #fff;
+}
+
+footer p {
+    margin: 0;
 }
