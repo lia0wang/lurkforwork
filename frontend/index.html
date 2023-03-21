@@ -20,14 +20,14 @@
     <header class="bg-dark py-3">
         <div class="container d-flex justify-content-between align-items-center">
             <!-- Title Section -->
-            <h1 class="text-white mb-0">lurkforwork.com</h1>
-            <nav>
+            <h1 class="text-white mb-0 flex-shrink-0">lurkforwork.com</h1>
+            <nav class="px-5">
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link text-white" id="nav-register" href="#">Register</a>
+                        <a class="nav-link text-white" id="nav-register">Register</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" id="nav-login" href="#">Login</a>
+                        <a class="nav-link text-white" id="nav-login">Login</a>
                     </li>
                 </ul>
             </nav>
@@ -36,25 +36,33 @@
 
     <main role="main">
         <div id="section-logged-in" class="hide">
-            <button id="create-job-fake">Create Fake Job</button><br />
-            <div id="feed-items">
+            <div class="container">
+                <h1 class="mb-4">Welcome to LurkForWork! :))</h1>
+                <p class="mb-5 lead">Your one-stop-shop for job hunting</p>
+                <button id="create-job-fake" class="btn btn-secondary mr-2">Create Fake Job</button>
+                <div id="feed-items"></div>
+                <br>
+                <button id="logout" class="btn btn-secondary mr-2">Logout</button>
+                  
+                  
             </div>
-            Woo hoo! logged in :)
-            <button id="logout">Logout</button>
+                
         </div>
-        <div id="section-logged-out">
 
+        <div id="section-logged-out">
             <div id="page-register">
                 <form>
                     <div class="form-group">
-                        <label for="register-name">User Name:</label>
-                        <input class="form-control" id="register-name" type="text" value="" />
                         <label for="register-email">Email:</label>
                         <input class="form-control" id="register-email" type="text" value="" />
+                        <label for="register-name">User Name:</label>
+                        <input class="form-control" id="register-name" type="text" value="" />
                         <label for="register-password">Password:</label>
                         <input class="form-control" id="register-password" type="password" value="">
+                        <label for="register-password-confirm">Confirm Password:</label>
+                        <input class="form-control" id="register-password-confirm" type="password" value="">
                     </div>
-                    <button id="register-button" class="btn btn-primary">Register</button>
+                    <button id="register-button" class="btn btn-secondary">Register</button>
                 </form>
             </div>
 
@@ -66,7 +74,7 @@
                         <label for="login-password">Password:</label>
                         <input class="form-control" id="login-password" type="password" value="">
                     </div>
-                    <button id="login-button" class="btn btn-primary">Login</button>
+                    <button id="login-button" class="btn btn-secondary">Login</button>
                 </form>
             </div>
 
@@ -74,8 +82,10 @@
     </main>
 
     <!-- Footer Section -->
-    <footer>
-        <p>&copy; lurkforwork.com 2023</p>
+    <footer class="bg-dark py-3">
+        <div class="container text-center">
+            <p class="m-0">&copy; lurkforwork.com 2023</p>
+        </div>
     </footer>
 
 

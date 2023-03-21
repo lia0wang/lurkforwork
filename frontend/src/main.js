@@ -62,6 +62,13 @@ document.getElementById("create-job-fake").addEventListener("click", () => {
 });
 
 document.getElementById("register-button").addEventListener("click", () => {
+    const password = document.getElementById("register-password").value;
+    const passwordConfirm = document.getElementById("register-password-confirm").value;
+    console.log(password, passwordConfirm);
+    if (password !== passwordConfirm) {
+        alert("Error: Passwords do not match");
+        return;
+    }
     const payload = {
         email: document.getElementById("register-email").value,
         password: document.getElementById("register-password").value,
