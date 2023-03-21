@@ -11,6 +11,13 @@
 	cursor: pointer;
 }
 
+/* Header Section */
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 /* Register CSS */
 #page-register form {
 	position: absolute;
