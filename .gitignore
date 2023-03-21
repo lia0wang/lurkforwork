@@ -2,3 +2,4 @@ node_modules
 backend/database.json
 backend/
 .DS_Store
+.idea
