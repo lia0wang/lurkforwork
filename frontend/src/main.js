@@ -2,6 +2,7 @@ import { BACKEND_PORT } from "./config.js";
 import { fileToDataUrl } from "./helpers.js";
 
 const apiCall = (path, method, body) => {
+    console.log("API call:", path, method, body);
     return new Promise((resolve, reject) => {
         const options = {
             method: method,
@@ -18,8 +19,10 @@ const apiCall = (path, method, body) => {
             options.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
         }
 
-        fetch("http://localhost:5005/" + path, options)
-            .then((response) => response.json())
+        fetch(`http://localhost:${BACKEND_PORT}/` + path, options)
+            .then((response) => {
+                return response.json();
+            })
             .then((data) => {
                 if (data.error) {
                     alert(data.error);
@@ -61,7 +64,8 @@ document.getElementById("create-job-fake").addEventListener("click", () => {
     apiCall("job", "POST", payload);
 });
 
-document.getElementById("register-button").addEventListener("click", () => {
+document.getElementById("register-button").addEventListener("click", (event) => {
+    event.preventDefault();
     const password = document.getElementById("register-password").value;
     const passwordConfirm = document.getElementById("register-password-confirm").value;
     console.log(password, passwordConfirm);
@@ -79,7 +83,8 @@ document.getElementById("register-button").addEventListener("click", () => {
     });
 });
 
-document.getElementById("login-button").addEventListener("click", () => {
+document.getElementById("login-button").addEventListener("click", (event) => {
+    event.preventDefault();
     const payload = {
         email: document.getElementById("login-email").value,
         password: document.getElementById("login-password").value,
@@ -115,7 +120,7 @@ document.getElementById("logout").addEventListener("click", () => {
     localStorage.removeItem("token");
 });
 
-// MAIN
+//////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
     show("section-logged-in");
