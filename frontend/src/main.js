@@ -1,4 +1,4 @@
-import { apiCall, show, hide, setToken, setUserId} from "./helpers.js";
+import { apiCall, show, hide, setToken, setUserId, handleLogin} from "./helpers.js";
 import { registerValidator, getValuesInForm} from "./auth.js";
 import { populateFeed } from "./feed.js";
 
@@ -24,9 +24,8 @@ document.getElementById("login-button").addEventListener("click", (event) => {
         password: password,
     };
     apiCall("auth/login", "POST", payload).then((data) => {
-        setToken(data.token);
-        setUserId(data.userId)
-    });
+        handleLogin(data);
+    });   
 });
 
 document.getElementById("register-button").addEventListener("click", (event) => {
@@ -41,29 +40,18 @@ document.getElementById("register-button").addEventListener("click", (event) => 
         name: name,
     };
     apiCall("auth/register", "POST", payload).then((data) => {
-        setToken(data.token);
-        setUserId(data.userId)
+        handleLogin(data);
     });
 });
 
-document.getElementById("login-button").addEventListener("click", (event) => {
-    event.preventDefault();
-    const [email, password] = getValuesInForm("login-form");
-    const payload = {
-        email: email,
-        password: password,
-    };
-    apiCall("auth/login", "POST", payload).then((data) => {
-        setToken(data.token);
-        setUserId(data.userId)
-    });
-});
-
-document.getElementById("logout").addEventListener("click", () => {
+document.getElementById("nav-logout").addEventListener("click", () => {
     show("section-logged-out");
     hide("section-logged-in");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
+    show("nav-register");
+    show("nav-login");
+    hide("nav-logout");
 });
 
 document.getElementById("create-job-fake").addEventListener("click", () => {
@@ -81,7 +69,10 @@ document.getElementById("create-job-fake").addEventListener("click", () => {
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
-    show("section-logged-in");
     hide("section-logged-out");
+    hide("nav-register");
+    hide("nav-login");
+    show("section-logged-in");
+    show("nav-logout");
     populateFeed();
 }

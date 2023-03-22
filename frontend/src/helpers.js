@@ -53,9 +53,15 @@ export const show = (element) => {
 };
 
 export const hide = (element) => {
-    console.log(document.getElementById(element).classList);
-    // document.getElementById(element).classList.remove("display: flex");
     document.getElementById(element).classList.add("hide");
+};
+
+export const handleLogin = (data) => {
+    setToken(data.token);
+    setUserId(data.userId)
+    hide("nav-register");
+    hide("nav-login");
+    show("nav-logout");
 };
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
