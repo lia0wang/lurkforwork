@@ -1,5 +1,5 @@
 import { BACKEND_PORT } from "./config.js";
-import { fileToDataUrl, apiCall } from "./helpers.js";
+import { fileToDataUrl, apiCall, showErrorPopup, show, hide } from "./helpers.js";
 import * as feed from "./feed.js";
 
 const setToken = (token) => {
@@ -92,12 +92,6 @@ document.getElementById("register-button").addEventListener("click", (event) => 
     });
 });
 
-// Show the error popup
-const showErrorPopup = (message) => {
-    document.getElementById("error-popup-message").textContent = `Error: ${message}`;
-    show("error-popup");
-};
-
 // Close the error popup
 document.getElementById("error-popup-close").addEventListener("click", () => {
     hide("error-popup");
@@ -115,16 +109,6 @@ document.getElementById("login-button").addEventListener("click", (event) => {
         setUserId(data.userId)
     });
 });
-
-const show = (element) => {
-    document.getElementById(element).classList.remove("hide");
-};
-
-const hide = (element) => {
-    console.log(document.getElementById(element).classList);
-    // document.getElementById(element).classList.remove("display: flex");
-    document.getElementById(element).classList.add("hide");
-};
 
 document.getElementById("nav-register").addEventListener("click", () => {
     show("page-register");

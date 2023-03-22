@@ -1,13 +1,17 @@
 .feed-card {
-    max-width: 540px;
+    max-width: 840px;
 }
 
 .job-image {
     alt: "Job image";
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
 }
 
 .creator-time-wrapper {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
 }
 
@@ -16,7 +20,24 @@
     margin: 0;
 }
 
+
 .feed-container {
     max-height: calc(100vh - 200px);
-    overflow-y: auto;
+}
+
+
+.like-button,
+.comment-button {
+    display: inline-flex;
+    align-items: center;
+}
+
+.like-button .fas,
+.comment-button .fas {
+    margin-right: 5px;
+}
+
+.badge {
+    margin-left: 3px;
+    padding: 2px 4px;
 }

@@ -74,3 +74,19 @@ export const apiCall = (path, method, body, headers = {}) => {
             });
     });
 };
+
+// Show the error popup
+export const showErrorPopup = (message) => {
+    document.getElementById("error-popup-message").textContent = `Error: ${message}`;
+    show("error-popup");
+};
+
+export const show = (element) => {
+    document.getElementById(element).classList.remove("hide");
+};
+
+export const hide = (element) => {
+    console.log(document.getElementById(element).classList);
+    // document.getElementById(element).classList.remove("display: flex");
+    document.getElementById(element).classList.add("hide");
+};
