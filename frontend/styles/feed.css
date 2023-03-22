@@ -1,0 +1,22 @@
+.feed-card {
+    max-width: 540px;
+}
+
+.job-image {
+    alt: "Job image";
+}
+
+.creator-time-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+.creator-text,
+.create-time-text {
+    margin: 0;
+}
+
+.feed-container {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
