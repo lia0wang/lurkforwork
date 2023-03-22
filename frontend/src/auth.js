@@ -1,10 +1,23 @@
+import { show } from "./helpers.js";
+
 //////////////////////////////////////////////////////// POPUPS ////////////////////////////////////////////////////////
+
 export const showErrorPopup = (message) => {
     document.getElementById("error-popup-message").textContent = `Error: ${message}`;
     show("error-popup");
 };
 
 //////////////////////////////////////////////////////// VALIDATORS ////////////////////////////////////////////////////////
+
+export const getValuesInForm = (formId) => {
+    let values = [];
+    const form = document.getElementById(formId);
+    for (let i = 0; i < form.length - 1; i++) {
+        values.push(form[i].value);
+    }
+    return values;
+};
+
 const emailValidator = (email) => {
     return String(email)
         .toLowerCase()

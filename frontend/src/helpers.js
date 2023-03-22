@@ -34,6 +34,7 @@ export function fileToDataUrl(file) {
 }
 
 ////////////////////////////////////////////////////// TOKEN ////////////////////////////////////////////////////////
+
 export const setToken = (token) => {
     localStorage.setItem("token", token);
     show("section-logged-in");
@@ -46,6 +47,7 @@ export const setUserId = (userId) => {
 };
 
 //////////////////////////////////////////////////////// DOM HELPERS ////////////////////////////////////////////////////////
+
 export const show = (element) => {
     document.getElementById(element).classList.remove("hide");
 };
@@ -56,16 +58,8 @@ export const hide = (element) => {
     document.getElementById(element).classList.add("hide");
 };
 
-export const getValuesInForm = (formId) => {
-    let values = [];
-    const form = document.getElementById(formId);
-    for (let i = 0; i < form.length - 1; i++) {
-        values.push(form[i].value);
-    }
-    return values;
-};
-
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
+
 export const apiCall = (path, method, body, headers = {}) => {
     console.log("API call:", path, method, body);
 

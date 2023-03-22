@@ -1,5 +1,5 @@
-import { apiCall, show, hide, getValuesInForm } from "./helpers.js";
-import { registerValidator } from "./auth.js";
+import { apiCall, show, hide, setToken, setUserId} from "./helpers.js";
+import { registerValidator, getValuesInForm} from "./auth.js";
 import { populateFeed } from "./feed.js";
 
 document.getElementById("error-popup-close").addEventListener("click", () => {
@@ -79,6 +79,7 @@ document.getElementById("create-job-fake").addEventListener("click", () => {
 });
 
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
+
 if (localStorage.getItem("token")) {
     show("section-logged-in");
     hide("section-logged-out");
