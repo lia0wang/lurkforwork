@@ -9,6 +9,10 @@ const setToken = (token) => {
     feed.populateFeed();
 };
 
+const setUserId = (userId) => {
+    localStorage.setItem("userId", userId);
+};
+
 document.getElementById("create-job-fake").addEventListener("click", () => {
     const payload = {
         title: "COO for cupcake factory",
@@ -84,6 +88,7 @@ document.getElementById("register-button").addEventListener("click", (event) => 
     };
     apiCall("auth/register", "POST", payload).then((data) => {
         setToken(data.token);
+        setUserId(data.userId)
     });
 });
 
@@ -107,6 +112,7 @@ document.getElementById("login-button").addEventListener("click", (event) => {
     };
     apiCall("auth/login", "POST", payload).then((data) => {
         setToken(data.token);
+        setUserId(data.userId)
     });
 });
 
@@ -134,6 +140,7 @@ document.getElementById("logout").addEventListener("click", () => {
     show("section-logged-out");
     hide("section-logged-in");
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
 });
 
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
