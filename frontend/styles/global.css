@@ -11,6 +11,30 @@
 	cursor: pointer;
 }
 
+/* Header Section */
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#error-popup-container {
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: #21252a;
+    width: 300px;
+    height: 150px;
+	position: absolute;
+    top: 300px;
+	left: 50%;
+	transform: translate(-50%, -50%);
+    z-index: 9999;
+    border-radius: 10px;
+    display: flex;
+}
+
 /* Register CSS */
 #page-register form {
 	position: absolute;

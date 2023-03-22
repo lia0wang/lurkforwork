@@ -31,7 +31,7 @@ const apiCall = (path, method, body, headers = {}) => {
             })
             .then((data) => {
                 if (data.error) {
-                    alert(data.error);
+                    showErrorPopup(data.error);
                 } else {
                     resolve(data);
                 }
@@ -81,7 +81,7 @@ document.getElementById("register-button").addEventListener("click", (event) => 
     const passwordConfirm = document.getElementById("register-password-confirm").value;
     console.log(password, passwordConfirm);
     if (password !== passwordConfirm) {
-        alert("Error: Passwords do not match");
+        showErrorPopup("Passwords do not match");
         return;
     }
     const payload = {
@@ -92,6 +92,17 @@ document.getElementById("register-button").addEventListener("click", (event) => 
     apiCall("auth/register", "POST", payload).then((data) => {
         setToken(data.token);
     });
+});
+
+// Show the error popup
+const showErrorPopup = (message) => {
+    document.getElementById("error-popup-message").textContent = `Error: ${message}`;
+    show("error-popup");
+};
+
+// Close the error popup
+document.getElementById("error-popup-close").addEventListener("click", () => {
+    hide("error-popup");
 });
 
 document.getElementById("login-button").addEventListener("click", (event) => {
