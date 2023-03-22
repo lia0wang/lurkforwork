@@ -1,100 +1,19 @@
-import { BACKEND_PORT } from "./config.js";
-import { fileToDataUrl, apiCall, showErrorPopup, show, hide } from "./helpers.js";
-import * as feed from "./feed.js";
+import { apiCall, show, hide, getValuesInForm } from "./helpers.js";
+import { registerValidator } from "./auth.js";
+import { populateFeed } from "./feed.js";
 
-const setToken = (token) => {
-    localStorage.setItem("token", token);
-    show("section-logged-in");
-    hide("section-logged-out");
-    feed.populateFeed();
-};
-
-const setUserId = (userId) => {
-    localStorage.setItem("userId", userId);
-};
-
-document.getElementById("create-job-fake").addEventListener("click", () => {
-    const payload = {
-        title: "COO for cupcake factory",
-        image:
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-        start: "2011-10-05T14:48:00.000Z",
-        description:
-            "Dedicated technical wizard with a passion and interest in human relationships",
-    };
-    apiCall("job", "POST", payload);
-});
-
-const emailValidator = (email) => {
-    return String(email)
-        .toLowerCase()
-        .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
-};
-
-const passwordValidator = (password) => {
-    return String(password).match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/);
-};
-
-const nameValidator = (name) => {
-    return String(name).length >= 2 && String(name).length <= 30;
-};
-
-const confirmValidator = (password, passwordConfirm) => {
-    return password === passwordConfirm;
-};
-
-const registerValidator = (email, name, password, passwordConfirm) => {
-    if (!emailValidator(email)) {
-        showErrorPopup("Email format should be: example@domain.com");
-        return false;
-    }
-    if (!nameValidator(name)) {
-        showErrorPopup("Name should be between 2 and 30 characters");
-        return false;
-    }
-    if (!passwordValidator(password)) {
-        showErrorPopup("Password should be at least 8 characters long and contain at least one uppercase letter and one number");
-        return false;
-    }
-    if (!confirmValidator(password, passwordConfirm)) {
-        showErrorPopup("Passwords do not match");
-        return false;
-    }
-    return true;
-};
-
-const getValuesInForm = (formId) => {
-    let values = [];
-    const form = document.getElementById(formId);
-    for (let i = 0; i < form.length - 1; i++) {
-        values.push(form[i].value);
-    }
-    return values;
-};
-
-document.getElementById("register-button").addEventListener("click", (event) => {
-    event.preventDefault();
-    const [email, name, password, passwordConfirm] = getValuesInForm("register-form");
-    if (!registerValidator(email, name, password, passwordConfirm)) {
-        return;
-    }
-
-    const payload = {
-        email: email,
-        password: password,
-        name: name,
-    };
-    apiCall("auth/register", "POST", payload).then((data) => {
-        setToken(data.token);
-        setUserId(data.userId)
-    });
-});
-
-// Close the error popup
 document.getElementById("error-popup-close").addEventListener("click", () => {
     hide("error-popup");
+});
+
+document.getElementById("nav-register").addEventListener("click", () => {
+    show("page-register");
+    hide("page-login");
+});
+
+document.getElementById("nav-login").addEventListener("click", () => {
+    hide("page-register");
+    show("page-login");
 });
 
 document.getElementById("login-button").addEventListener("click", (event) => {
@@ -110,14 +29,34 @@ document.getElementById("login-button").addEventListener("click", (event) => {
     });
 });
 
-document.getElementById("nav-register").addEventListener("click", () => {
-    show("page-register");
-    hide("page-login");
+document.getElementById("register-button").addEventListener("click", (event) => {
+    event.preventDefault();
+    const [email, name, password, passwordConfirm] = getValuesInForm("register-form");
+    if (!registerValidator(email, name, password, passwordConfirm)) {
+        return;
+    }
+    const payload = {
+        email: email,
+        password: password,
+        name: name,
+    };
+    apiCall("auth/register", "POST", payload).then((data) => {
+        setToken(data.token);
+        setUserId(data.userId)
+    });
 });
 
-document.getElementById("nav-login").addEventListener("click", () => {
-    hide("page-register");
-    show("page-login");
+document.getElementById("login-button").addEventListener("click", (event) => {
+    event.preventDefault();
+    const [email, password] = getValuesInForm("login-form");
+    const payload = {
+        email: email,
+        password: password,
+    };
+    apiCall("auth/login", "POST", payload).then((data) => {
+        setToken(data.token);
+        setUserId(data.userId)
+    });
 });
 
 document.getElementById("logout").addEventListener("click", () => {
@@ -127,10 +66,21 @@ document.getElementById("logout").addEventListener("click", () => {
     localStorage.removeItem("userId");
 });
 
-//////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
+document.getElementById("create-job-fake").addEventListener("click", () => {
+    const payload = {
+        title: "COO for cupcake factory",
+        image:
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+        start: "2011-10-05T14:48:00.000Z",
+        description:
+            "Dedicated technical wizard with a passion and interest in human relationships",
+    };
+    apiCall("job", "POST", payload);
+});
 
+//////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 if (localStorage.getItem("token")) {
     show("section-logged-in");
     hide("section-logged-out");
-    feed.populateFeed();
+    populateFeed();
 }

@@ -1,5 +1,6 @@
 import { BACKEND_PORT } from "./config.js";
-
+import { showErrorPopup } from "./auth.js";
+import { populateFeed } from "./feed.js";
 /**
  * Given a js file object representing a jpg or png image, such as one taken
  * from a html file input element, return a promise which resolves to the file
@@ -32,6 +33,39 @@ export function fileToDataUrl(file) {
     return dataUrlPromise;
 }
 
+////////////////////////////////////////////////////// TOKEN ////////////////////////////////////////////////////////
+export const setToken = (token) => {
+    localStorage.setItem("token", token);
+    show("section-logged-in");
+    hide("section-logged-out");
+    populateFeed();
+};
+
+export const setUserId = (userId) => {
+    localStorage.setItem("userId", userId);
+};
+
+//////////////////////////////////////////////////////// DOM HELPERS ////////////////////////////////////////////////////////
+export const show = (element) => {
+    document.getElementById(element).classList.remove("hide");
+};
+
+export const hide = (element) => {
+    console.log(document.getElementById(element).classList);
+    // document.getElementById(element).classList.remove("display: flex");
+    document.getElementById(element).classList.add("hide");
+};
+
+export const getValuesInForm = (formId) => {
+    let values = [];
+    const form = document.getElementById(formId);
+    for (let i = 0; i < form.length - 1; i++) {
+        values.push(form[i].value);
+    }
+    return values;
+};
+
+//////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
 export const apiCall = (path, method, body, headers = {}) => {
     console.log("API call:", path, method, body);
 
@@ -73,20 +107,4 @@ export const apiCall = (path, method, body, headers = {}) => {
                 reject(error);
             });
     });
-};
-
-// Show the error popup
-export const showErrorPopup = (message) => {
-    document.getElementById("error-popup-message").textContent = `Error: ${message}`;
-    show("error-popup");
-};
-
-export const show = (element) => {
-    document.getElementById(element).classList.remove("hide");
-};
-
-export const hide = (element) => {
-    console.log(document.getElementById(element).classList);
-    // document.getElementById(element).classList.remove("display: flex");
-    document.getElementById(element).classList.add("hide");
 };
