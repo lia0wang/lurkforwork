@@ -12,10 +12,11 @@ const apiCall = (path, method, body, headers = {}) => {
         },
     };
 
-    if (method === "GET" && body) {
+    if (method === "GET" && body ) {
         // Convert body object to query string for GET requests
         const queryString = new URLSearchParams(body).toString();
-        path += "?" + queryString;
+        if (queryString)
+            path += "?" + queryString;
     } else if (body) {
         options.body = JSON.stringify(body);
     }
@@ -43,16 +44,67 @@ const apiCall = (path, method, body, headers = {}) => {
     });
 };
 
-const populateFeed = () => {
-    apiCall("job/feed?start=0", "GET", {}).then((data) => {
-        document.getElementById("feed-items").textContent = "";
-        for (const feedItem of data) {
-            const feedDom = document.createElement("div");
-            feedDom.style.border = "1px solid #000";
-            feedDom.innerText = feedItem.title;
-            document.getElementById("feed-items").appendChild(feedDom);
-        }
-    });
+const populateFeed = async () => {
+    const data = await apiCall("job/feed?start=0", "GET", {});
+    document.getElementById("feed-items").textContent = "";
+
+    for (const feedItem of data) {
+        const feedDom = document.createElement("div");
+        feedDom.className = "card mb-3 feed-card";
+
+        const row = document.createElement("div");
+        row.className = "row no-gutters";
+        feedDom.appendChild(row);
+
+        const colImg = document.createElement("div");
+        colImg.className = "col-md-4";
+        row.appendChild(colImg);
+
+        const img = document.createElement("img");
+        img.src = feedItem.image;
+        img.className = "card-img job-image";
+        img.alt = "Job image";
+        colImg.appendChild(img);
+
+        const colBody = document.createElement("div");
+        colBody.className = "col-md-8";
+        row.appendChild(colBody);
+
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+        colBody.appendChild(cardBody);
+
+        const title = document.createElement("h5");
+        title.className = "card-title";
+        title.textContent = feedItem.title;
+        cardBody.appendChild(title);
+
+        const description = document.createElement("p");
+        description.className = "card-text";
+        description.textContent = feedItem.description;
+        cardBody.appendChild(description);
+
+        const creatorAndTime = document.createElement("p");
+        creatorAndTime.className = "card-text creator-time-wrapper";
+
+        const creatorText = document.createElement("small");
+        creatorText.className = "text-muted creator-text";
+        creatorText.textContent = "Created by: " + await getCreatorUsername(feedItem.creatorId);
+        creatorAndTime.appendChild(creatorText);
+
+        const createTimeText = document.createElement("small");
+        createTimeText.className = "text-muted create-time-text";
+        createTimeText.textContent = "Created at: " + feedItem.createdAt.slice(0, 10);
+        creatorAndTime.appendChild(createTimeText);
+
+        cardBody.appendChild(creatorAndTime);
+        document.getElementById("feed-items").appendChild(feedDom);
+    }
+};
+
+const getCreatorUsername = async (id) => {
+    const data = await apiCall(`user`, "GET", { userId: id });
+    return data.name;
 };
 
 const setToken = (token) => {

@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <!-- You can add your styles and scripts here -->
         <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
+        <link rel="stylesheet" type="text/css" media="screen" href="styles/feed.css" />
         <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
             rel="stylesheet"
@@ -43,20 +44,22 @@
                 <p id="error-popup-message"></p>
                 <button id="error-popup-close" class="btn btn-secondary">Close</button>
             </div>
-       </div>
-       
+        </div>
+
         <main role="main">
             <!-- Logged In Section -->
-            <div id="section-logged-in" class="hide">         
+            <div id="section-logged-in" class="hide">
                 <div class="container">
                     <h1 class="mb-4">Welcome to LurkForWork! :))</h1>
                     <p class="mb-5 lead">Your one-stop-shop for job hunting</p>
-                    <button id="create-job-fake" class="btn btn-secondary mr-2">
-                        Create Fake Job
-                    </button>
-                    <div id="feed-items"></div>
-                    <br />
-                    <button id="logout" class="btn btn-secondary mr-2">Logout</button>
+                    <div class="feed-container">
+                        <button id="create-job-fake" class="btn btn-secondary mr-2">
+                            Create Fake Job
+                        </button>
+                        <div id="feed-items"></div>
+                        <br />
+                        <button id="logout" class="btn btn-secondary mr-2">Logout</button>
+                    </div>
                 </div>
             </div>
 
@@ -86,7 +89,7 @@
                         <button id="register-button" class="btn btn-secondary">Register</button>
                     </form>
                 </div>
-                
+
                 <!-- Login Section -->
                 <div id="page-login" class="hide">
                     <form id="login-form">
