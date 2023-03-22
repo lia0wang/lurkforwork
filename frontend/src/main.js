@@ -117,6 +117,20 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     hide("nav-feed");
 });
 
+document.getElementById("nav-profile").addEventListener("click", () => {
+    show("page-profile");
+    hide("page-feed");
+    show("nav-feed");
+    hide("nav-profile");
+});
+
+document.getElementById("nav-feed").addEventListener("click", () => {
+    show("page-feed");
+    hide("page-profile");
+    show("nav-profile");
+    hide("nav-feed");
+});
+
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
