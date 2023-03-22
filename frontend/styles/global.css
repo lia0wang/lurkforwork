@@ -19,6 +19,7 @@ header .container {
 }
 
 #error-popup-container {
+    text-align: center;
     color: #fff;
     align-items: center;
     justify-content: center;

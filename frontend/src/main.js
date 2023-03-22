@@ -43,7 +43,6 @@ const apiCall = (path, method, body, headers = {}) => {
     });
 };
 
-
 const populateFeed = () => {
     apiCall("job/feed?start=0", "GET", {}).then((data) => {
         document.getElementById("feed-items").textContent = "";
@@ -75,19 +74,66 @@ document.getElementById("create-job-fake").addEventListener("click", () => {
     apiCall("job", "POST", payload);
 });
 
+const emailValidator = (email) => {
+    return String(email)
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+};
+
+const passwordValidator = (password) => {
+    return String(password).match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/);
+};
+
+const nameValidator = (name) => {
+    return String(name).length >= 2 && String(name).length <= 30;
+};
+
+const confirmValidator = (password, passwordConfirm) => {
+    return password === passwordConfirm;
+};
+
+const registerValidator = (email, name, password, passwordConfirm) => {
+    if (!emailValidator(email)) {
+        showErrorPopup("Email format should be: example@domain.com");
+        return false;
+    }
+    if (!nameValidator(name)) {
+        showErrorPopup("Name should be between 2 and 30 characters");
+        return false;
+    }
+    if (!passwordValidator(password)) {
+        showErrorPopup("Password should be at least 8 characters long and contain at least one uppercase letter and one number");
+        return false;
+    }
+    if (!confirmValidator(password, passwordConfirm)) {
+        showErrorPopup("Passwords do not match");
+        return false;
+    }
+    return true;
+};
+
+const getValuesInForm = (formId) => {
+    let values = [];
+    const form = document.getElementById(formId);
+    for (let i = 0; i < form.length - 1; i++) {
+        values.push(form[i].value);
+    }
+    return values;
+};
+
 document.getElementById("register-button").addEventListener("click", (event) => {
     event.preventDefault();
-    const password = document.getElementById("register-password").value;
-    const passwordConfirm = document.getElementById("register-password-confirm").value;
-    console.log(password, passwordConfirm);
-    if (password !== passwordConfirm) {
-        showErrorPopup("Passwords do not match");
+    const [email, name, password, passwordConfirm] = getValuesInForm("register-form");
+    if (!registerValidator(email, name, password, passwordConfirm)) {
         return;
     }
+
     const payload = {
-        email: document.getElementById("register-email").value,
-        password: document.getElementById("register-password").value,
-        name: document.getElementById("register-name").value,
+        email: email,
+        password: password,
+        name: name,
     };
     apiCall("auth/register", "POST", payload).then((data) => {
         setToken(data.token);
@@ -107,9 +153,10 @@ document.getElementById("error-popup-close").addEventListener("click", () => {
 
 document.getElementById("login-button").addEventListener("click", (event) => {
     event.preventDefault();
+    const [email, password] = getValuesInForm("login-form");
     const payload = {
-        email: document.getElementById("login-email").value,
-        password: document.getElementById("login-password").value,
+        email: email,
+        password: password,
     };
     apiCall("auth/login", "POST", payload).then((data) => {
         setToken(data.token);
