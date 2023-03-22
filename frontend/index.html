@@ -23,7 +23,6 @@
         <!-- Header Section -->
         <header class="bg-dark py-3">
             <div class="container d-flex justify-content-between align-items-center">
-                <!-- Title Section -->
                 <h1 class="text-white mb-0 flex-shrink-0">lurkforwork</h1>
                 <nav class="px-5">
                     <ul class="nav">
@@ -38,8 +37,17 @@
             </div>
         </header>
 
+        <!-- Popup Section -->
+        <div id="error-popup" class="hide">
+            <div id="error-popup-container">
+                <p id="error-popup-message"></p>
+                <button id="error-popup-close" class="btn btn-secondary">Close</button>
+            </div>
+       </div>
+       
         <main role="main">
-            <div id="section-logged-in" class="hide">
+            <!-- Logged In Section -->
+            <div id="section-logged-in" class="hide">         
                 <div class="container">
                     <h1 class="mb-4">Welcome to LurkForWork! :))</h1>
                     <p class="mb-5 lead">Your one-stop-shop for job hunting</p>
@@ -52,7 +60,9 @@
                 </div>
             </div>
 
+            <!-- Logged Out Section -->
             <div id="section-logged-out">
+                <!-- Register Section -->
                 <div id="page-register">
                     <form>
                         <div class="form-group">
@@ -76,7 +86,8 @@
                         <button id="register-button" class="btn btn-secondary">Register</button>
                     </form>
                 </div>
-
+                
+                <!-- Login Section -->
                 <div id="page-login" class="hide">
                     <form>
                         <div class="form-group">
