@@ -1,117 +1,12 @@
 import { BACKEND_PORT } from "./config.js";
-import { fileToDataUrl } from "./helpers.js";
-
-const apiCall = (path, method, body, headers = {}) => {
-    console.log("API call:", path, method, body);
-
-    const options = {
-        method: method,
-        headers: {
-            "Content-type": "application/json",
-            ...headers, // Merge custom headers
-        },
-    };
-
-    if (method === "GET" && body ) {
-        // Convert body object to query string for GET requests
-        const queryString = new URLSearchParams(body).toString();
-        if (queryString)
-            path += "?" + queryString;
-    } else if (body) {
-        options.body = JSON.stringify(body);
-    }
-
-    if (localStorage.getItem("token")) {
-        options.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
-    }
-
-    return new Promise((resolve, reject) => {
-        fetch(`http://localhost:${BACKEND_PORT}/` + path, options)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                if (data.error) {
-                    showErrorPopup(data.error);
-                } else {
-                    resolve(data);
-                }
-            })
-            .catch((error) => {
-                console.error("Fetch error:", error);
-                reject(error);
-            });
-    });
-};
-
-const populateFeed = async () => {
-    const data = await apiCall("job/feed?start=0", "GET", {});
-    document.getElementById("feed-items").textContent = "";
-
-    for (const feedItem of data) {
-        const feedDom = document.createElement("div");
-        feedDom.className = "card mb-3 feed-card";
-
-        const row = document.createElement("div");
-        row.className = "row no-gutters";
-        feedDom.appendChild(row);
-
-        const colImg = document.createElement("div");
-        colImg.className = "col-md-4";
-        row.appendChild(colImg);
-
-        const img = document.createElement("img");
-        img.src = feedItem.image;
-        img.className = "card-img job-image";
-        img.alt = "Job image";
-        colImg.appendChild(img);
-
-        const colBody = document.createElement("div");
-        colBody.className = "col-md-8";
-        row.appendChild(colBody);
-
-        const cardBody = document.createElement("div");
-        cardBody.className = "card-body";
-        colBody.appendChild(cardBody);
-
-        const title = document.createElement("h5");
-        title.className = "card-title";
-        title.textContent = feedItem.title;
-        cardBody.appendChild(title);
-
-        const description = document.createElement("p");
-        description.className = "card-text";
-        description.textContent = feedItem.description;
-        cardBody.appendChild(description);
-
-        const creatorAndTime = document.createElement("p");
-        creatorAndTime.className = "card-text creator-time-wrapper";
-
-        const creatorText = document.createElement("small");
-        creatorText.className = "text-muted creator-text";
-        creatorText.textContent = "Created by: " + await getCreatorUsername(feedItem.creatorId);
-        creatorAndTime.appendChild(creatorText);
-
-        const createTimeText = document.createElement("small");
-        createTimeText.className = "text-muted create-time-text";
-        createTimeText.textContent = "Created at: " + feedItem.createdAt.slice(0, 10);
-        creatorAndTime.appendChild(createTimeText);
-
-        cardBody.appendChild(creatorAndTime);
-        document.getElementById("feed-items").appendChild(feedDom);
-    }
-};
-
-const getCreatorUsername = async (id) => {
-    const data = await apiCall(`user`, "GET", { userId: id });
-    return data.name;
-};
+import { fileToDataUrl, apiCall } from "./helpers.js";
+import * as feed from "./feed.js";
 
 const setToken = (token) => {
     localStorage.setItem("token", token);
     show("section-logged-in");
     hide("section-logged-out");
-    populateFeed();
+    feed.populateFeed();
 };
 
 document.getElementById("create-job-fake").addEventListener("click", () => {
@@ -246,5 +141,5 @@ document.getElementById("logout").addEventListener("click", () => {
 if (localStorage.getItem("token")) {
     show("section-logged-in");
     hide("section-logged-out");
-    populateFeed();
+    feed.populateFeed();
 }
