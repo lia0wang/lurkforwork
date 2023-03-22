@@ -25,7 +25,7 @@ document.getElementById("login-button").addEventListener("click", (event) => {
     };
     apiCall("auth/login", "POST", payload).then((data) => {
         handleLogin(data);
-    });   
+    });
 });
 
 document.getElementById("register-button").addEventListener("click", (event) => {
@@ -52,18 +52,6 @@ document.getElementById("nav-logout").addEventListener("click", () => {
     show("nav-register");
     show("nav-login");
     hide("nav-logout");
-});
-
-document.getElementById("create-job-fake").addEventListener("click", () => {
-    const payload = {
-        title: "COO for cupcake factory",
-        image:
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
-        start: "2011-10-05T14:48:00.000Z",
-        description:
-            "Dedicated technical wizard with a passion and interest in human relationships",
-    };
-    apiCall("job", "POST", payload);
 });
 
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
