@@ -117,7 +117,7 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     hide("nav-feed");
 });
 
-document.getElementById("nav-profile").addEventListener("click", () => {
+document.getElementById("nav-profile").addEventListener("click", async () => {
     show("page-profile");
     hide("page-feed");
     show("nav-feed");
@@ -126,51 +126,28 @@ document.getElementById("nav-profile").addEventListener("click", () => {
     const payload = {
         userId: localStorage.getItem("userId"),
     };
-    apiCall("user", "GET", payload).then((data) => {
-        console.log(data);
-        document.getElementById("profile-id").textContent = data.id;
-        document.getElementById("profile-image").src = data.image;
-        document.getElementById("profile-name").textContent = data.name;
-        document.getElementById("profile-email").textContent = data.email;
-        
-        const jobs = data.jobs;
-        const jobList = document.getElementById("profile-jobs");
-        jobList.textContent = "";
-        jobs.forEach((job) => {
-            const titleElement = document.createElement("h3");
-            const idElement = document.createElement("p");
-            const creatorIdElement = document.createElement("p");
-            const descriptionElement = document.createElement("p");
-            const imageElement = document.createElement("img");
-            const createdAtElement = document.createElement("p");
-            const startElement = document.createElement("p");
-            
-            titleElement.textContent = job.title;
-            idElement.textContent = job.id;
-            creatorIdElement.textContent = job.creatorId;
-            descriptionElement.textContent = job.description;
-            imageElement.src = job.image;
-            createdAtElement.textContent = job.createdAt;
-            startElement.textContent = job.start;
-            
-            jobList.appendChild(titleElement);
-            jobList.appendChild(idElement);
-            jobList.appendChild(creatorIdElement);
-            jobList.appendChild(descriptionElement);
-            jobList.appendChild(imageElement);
-            jobList.appendChild(createdAtElement);
-            jobList.appendChild(startElement);
-        });
-        
-        const watchees = data.watcheeUserIds;
-        console.log(watchees);
-        const watcheeList = document.getElementById("profile-watchees");
-        watcheeList.textContent = "";
-        watchees.forEach((watchee) => {
-            const watcheeElement = document.createElement("li");
-            watcheeElement.textContent = watchee;
-            watcheeList.appendChild(watcheeElement);
-        });
+    
+    const data = await apiCall("user", "GET", payload);
+    // User Profile
+    console.log(data);
+    // document.getElementById("profile-id").textContent = data.id;
+    // document.getElementById("profile-image").src = data.image;
+    // document.getElementById("profile-name").textContent = data.name;
+    // document.getElementById("profile-email").textContent = data.email;
+    
+    // Jobs
+    
+    // Watchees
+    const watchees = data.watcheeUserIds;
+    console.log(watchees);
+
+    const watcheeList = document.getElementById("profile-watchees");
+    watcheeList.textContent = "";
+    watchees.forEach(async (watcheeId) => {
+        const watcheeName = await getUsernameById(watcheeId);
+        const watcheeElement = document.createElement("li");
+        watcheeElement.textContent = watcheeName;
+        watcheeList.appendChild(watcheeElement);
     });
 });
 
