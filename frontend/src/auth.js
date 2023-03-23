@@ -18,7 +18,7 @@ export const getValuesInForm = (formId) => {
     return values;
 };
 
-const emailValidator = (email) => {
+export const emailValidator = (email) => {
     return String(email)
         .toLowerCase()
         .match(
@@ -26,11 +26,11 @@ const emailValidator = (email) => {
         );
 };
 
-const passwordValidator = (password) => {
+export const passwordValidator = (password) => {
     return String(password).match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/);
 };
 
-const nameValidator = (name) => {
+export const nameValidator = (name) => {
     return String(name).length >= 2 && String(name).length <= 30;
 };
 

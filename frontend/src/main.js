@@ -1,5 +1,5 @@
-import { apiCall, show, hide, handleLogin, getUsernameById} from "./helpers.js";
-import { registerValidator, getValuesInForm} from "./auth.js";
+import { apiCall, show, hide, handleLogin, getUsernameById } from "./helpers.js";
+import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
 import { populateFeed, populateItems } from "./feed.js";
 
 document.getElementById("error-popup-close").addEventListener("click", () => {
@@ -63,24 +63,31 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     hide("page-feed");
     show("nav-feed");
     hide("nav-profile");
-    
+
     const payload = {
         userId: localStorage.getItem("userId"),
     };
-    
+
     const data = await apiCall("user", "GET", payload);
-    // User Profile
-    console.log(data);
+
     const userAvatar = document.getElementById("user-avatar");
-    userAvatar.src = data.image;
-    console.log("userAvatar.src: ", userAvatar.src);
+    userAvatar.style.backgroundImage = `url(${data.image})`;
+
     const userId = document.getElementById("user-id");
-    userId.textContent = `ID: ${data.id}`
+    userId.textContent = `#${data.id}`;
+
     const userName = document.getElementById("user-name");
-    userName.textContent = `Name: ${data.name}`
+    userName.textContent = `${data.name}`;
+
     const userEmail = document.getElementById("user-email");
-    userEmail.textContent = `Email: ${data.email}`
-    
+    userEmail.textContent = `${data.email}`;
+
+    // Add Bootstrap classes to the elements
+    userAvatar.classList.add("avatar");
+    userId.classList.add("user-info__text");
+    userName.classList.add("user-info__text");
+    userEmail.classList.add("user-info__text");
+
     // Jobs
     const jobs = data.jobs;
     const containerId = "user-jobs";
@@ -89,25 +96,87 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     // Watchees
     const watchees = data.watcheeUserIds;
     const numWatchees = watchees.length;
-    
+
     const numWatcheesElement = document.getElementById("watchees-num");
     numWatcheesElement.textContent = numWatchees;
+    numWatcheesElement.style.fontWeight = "bold";
 
     const watcheesContainer = document.getElementById("user-watchees");
-    let count = 1;
     watcheesContainer.textContent = "";
     for (const watcheeId of watchees) {
         const payload = {
             userId: watcheeId,
-        }
-        const watcheeInfo = await apiCall(`user`, "GET", payload);
-        console.log(watcheeInfo);
+        };
+        const watcheeInfo = await apiCall("user", "GET", payload);
         const watcheeName = await getUsernameById(watcheeId);
-        const watcheeElement = document.createElement("p");
-        watcheeElement.textContent = `${count}: ${watcheeName}`
+
+        const watcheeElement = document.createElement("div");
+        watcheeElement.classList.add("card", "mb-3");
+        watcheeElement.style.maxWidth = "200px";
+        watcheeElement.style.maxHeight = "100px";
+
+        const cardBody = document.createElement("div");
+        cardBody.classList.add("card-body", "p-3");
+
+        const cardTitle = document.createElement("h5");
+        cardTitle.classList.add("card-title", "mb-1");
+        cardTitle.textContent = watcheeName;
+
+        const cardSubtitle = document.createElement("h6");
+        cardSubtitle.classList.add("card-subtitle", "text-muted", "mb-3");
+        cardSubtitle.textContent = watcheeInfo.email;
+
+        const avatarContainer = document.createElement("div");
+
+        const avatar = document.createElement("div");
+        avatar.style.backgroundImage = `url(${watcheeInfo.image})`;
+
+        avatarContainer.appendChild(avatar);
+
+        cardBody.appendChild(cardTitle);
+        cardBody.appendChild(cardSubtitle);
+        cardBody.appendChild(avatarContainer);
+        watcheeElement.appendChild(cardBody);
         watcheesContainer.appendChild(watcheeElement);
-        count++;
     }
+});
+
+document.getElementById("edit-profile-button").addEventListener("click", async () => {
+    const userAvatar = document.getElementById("user-avatar");
+    const userName = document.getElementById("user-name");
+    const userEmail = document.getElementById("user-email");
+    
+    const email = prompt("Enter your new email:");
+    if (!emailValidator(email)) {
+        showErrorPopup("Email format should be: example@domain.com");
+        return false;
+    }
+    userEmail.textContent = `${email}`;
+
+    const password = prompt("Enter your new password:");
+    if (!passwordValidator(password)) {
+        showErrorPopup("Password should be at least 8 characters long and contain at least one uppercase letter and one number");
+        return false;
+    }
+
+    const name = prompt("Enter your new name:");
+    if (!nameValidator(name)) {
+        showErrorPopup("Name should be between 2 and 30 characters");
+        return false;
+    }
+    userName.textContent = `${name}`;
+
+    const image = prompt("Enter your new image URL:");
+    userAvatar.style.backgroundImage = `url(${image})`;
+
+    const payload = {
+        email: email,
+        password: password,
+        name: name,
+        image: image,
+    };
+
+    await apiCall("user", "PUT", payload);
 });
 
 document.getElementById("nav-feed").addEventListener("click", () => {

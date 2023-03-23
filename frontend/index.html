@@ -1,178 +1,164 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <title>LurkForWork</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!-- You can add your styles and scripts here -->
-        <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
-        <link rel="stylesheet" type="text/css" media="screen" href="styles/feed.css" />
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
-            crossorigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Nunito&display=swap"
-            rel="stylesheet" />
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
-    </head>
 
-    <body>
-        <!-- Header Section -->
-        <header class="bg-dark py-3">
-            <div class="container d-flex justify-content-between align-items-center">
-                <h1 class="text-white mb-0 flex-shrink-0">lurkforwork</h1>
-                <nav class="px-5">
-                    <ul class="nav">
-                        <li id="nav-register" class="nav-item">
-                            <a class="nav-link text-white">Register</a>
-                        </li>
-                        <li id="nav-login" class="nav-item">
-                            <a class="nav-link text-white">Login</a>
-                        </li>
-                        <li id="nav-profile" class="nav-item hide">
-                            <a class="nav-link text-white">Profile</a>
-                        </li>
-                        <li id="nav-feed" class="nav-item hide">
-                            <a class="nav-link text-white">Feed</a>
-                        </li>
-                        <li id="nav-logout" class="nav-item hide">
-                            <a class="nav-link text-white">Logout</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>LurkForWork</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- You can add your styles and scripts here -->
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/feed.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/users.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+</head>
 
-        <!-- Popup Section -->
-        <div id="error-popup" class="hide">
-            <div id="error-popup-container">
-                <p id="error-popup-message"></p>
-                <button id="error-popup-close" class="btn btn-secondary">Close</button>
-            </div>
-        </div>
-
-        <!-- Like List Popup Section -->
-        <div id="like-list-popup" class="feed-popup">
-            <div class="feed-popup-content">
-                <div class="feed-popup-header">
-                    <h4 class="feed-popup-title">This post is liked by:</h4>
-                    <span id="like-close-btn">&times;</span>
-                </div>
-                <ul id="like-list" class="list-group">
-                    <!-- List items will be populated here -->
+<body>
+    <!-- Header Section -->
+    <header class="bg-dark py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="text-white mb-0 flex-shrink-0">lurkforwork</h1>
+            <nav class="px-5">
+                <ul class="nav">
+                    <li id="nav-register" class="nav-item">
+                        <a class="nav-link text-white">Register</a>
+                    </li>
+                    <li id="nav-login" class="nav-item">
+                        <a class="nav-link text-white">Login</a>
+                    </li>
+                    <li id="nav-profile" class="nav-item hide">
+                        <a class="nav-link text-white">Profile</a>
+                    </li>
+                    <li id="nav-feed" class="nav-item hide">
+                        <a class="nav-link text-white">Feed</a>
+                    </li>
+                    <li id="nav-logout" class="nav-item hide">
+                        <a class="nav-link text-white">Logout</a>
+                    </li>
                 </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Popup Section -->
+    <div id="error-popup" class="hide">
+        <div id="error-popup-container">
+            <p id="error-popup-message"></p>
+            <button id="error-popup-close" class="btn btn-secondary">Close</button>
+        </div>
+    </div>
+
+    <!-- Like List Popup Section -->
+    <div id="like-list-popup" class="feed-popup">
+        <div class="feed-popup-content">
+            <div class="feed-popup-header">
+                <h4 class="feed-popup-title">This post is liked by:</h4>
+                <span id="like-close-btn">&times;</span>
+            </div>
+            <ul id="like-list" class="list-group">
+                <!-- List items will be populated here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Like List Popup Section -->
+    <div id="comment-list-popup" class="feed-popup">
+        <div class="feed-popup-content">
+            <div class="feed-popup-header">
+                <h4 class="feed-popup-title">Comments:</h4>
+                <span id="comment-close-btn">&times;</span>
+            </div>
+            <ul id="comment-list" class="list-group">
+                <!-- List items will be populated here -->
+            </ul>
+            <div class="comment-input">
+                <input id="comment-input" type="text" class="form-control" placeholder="Write a comment..." />
+                <button id="comment-button" class="btn btn-secondary">Comment</button>
             </div>
         </div>
+    </div>
 
-        <!-- Like List Popup Section -->
-        <div id="comment-list-popup" class="feed-popup">
-            <div class="feed-popup-content">
-                <div class="feed-popup-header">
-                    <h4 class="feed-popup-title">Comments:</h4>
-                    <span id="comment-close-btn">&times;</span>
-                </div>
-                <ul id="comment-list" class="list-group">
-                    <!-- List items will be populated here -->
-                </ul>
-                <div class="comment-input">
-                    <input
-                        id="comment-input"
-                        type="text"
-                        class="form-control"
-                        placeholder="Write a comment..." />
-                    <button id="comment-button" class="btn btn-secondary">Comment</button>
-                </div>
-            </div>
-        </div>
-
-        <main role="main">
-            <!-- Logged In Section -->
-            <div id="section-logged-in" class="hide">
-                <div id="page-feed" class="container">
+    <main role="main">
+        <!-- Logged In Section -->
+        <div id="section-logged-in" class="hide">
+            <div id="page-feed">
+                <div class="container">
                     <div class="feed-container">
                         <div id="feed-items"></div>
                     </div>
                 </div>
+            </div>
 
-                <!-- User Profile -->
-                <div id="page-profile" class="hide">
-                    <div id="user-info">
-                        <div id="user-avatar" src=""></div>
-                        <div id="user-id"></div>
-                        <div id="user-name"></div>
-                        <div id="user-email"></div>
+            <!-- User Profile -->
+            <div id="page-profile" class="hide">
+                <div id="user-info">
+                    <div class="d-flex align-items-center">
+                        <div id="user-avatar" class="rounded-circle me-3"></div>
+                        <div>
+                            <span id="user-name" class="mb-0"></span>
+                            <span id="user-id" class="text-muted mb-0"></span>
+                            <p id="user-email" class="mb-0"></p>
+                            Watching <span class="badge badge-pill bg-secondary" id="watchees-num"></span> Users
+                        </div>
                     </div>
-                    <div id="user-jobs">Jobs Made</div>
-                    <span id="watchees-num"></span> Watching
-                    <div id="user-watchees"></div>
                 </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="edit-profile-button">Update Info</button>
+                <div id="user-watchees"></div>
+                <div id="user-jobs"></div>
             </div>
-                
-                  
-            <!-- Logged Out Section -->
-            <div id="section-logged-out">
-                <!-- Register Section -->
-                <div id="page-register">
-                    <form id="register-form">
-                        <div class="form-group">
-                            <label for="register-email">Email:</label>
-                            <input class="form-control" id="register-email" type="text" value="" />
-                            <label for="register-name">User Name:</label>
-                            <input class="form-control" id="register-name" type="text" value="" />
-                            <label for="register-password">Password:</label>
-                            <input
-                                class="form-control"
-                                id="register-password"
-                                type="password"
-                                value="" />
-                            <label for="register-password-confirm">Confirm Password:</label>
-                            <input
-                                class="form-control"
-                                id="register-password-confirm"
-                                type="password"
-                                value="" />
-                        </div>
-                        <button id="register-button" class="btn btn-secondary">Register</button>
-                    </form>
-                </div>
+        </div>
 
-                <!-- Login Section -->
-                <div id="page-login" class="hide">
-                    <form id="login-form">
-                        <div class="form-group">
-                            <label for="login-email">Email:</label>
-                            <input class="form-control" id="login-email" type="text" value="" />
-                            <label for="login-password">Password:</label>
-                            <input
-                                class="form-control"
-                                id="login-password"
-                                type="password"
-                                value="" />
-                        </div>
-                        <button id="login-button" class="btn btn-secondary">Login</button>
-                    </form>
-                </div>
+
+        <!-- Logged Out Section -->
+        <div id="section-logged-out">
+            <!-- Register Section -->
+            <div id="page-register">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input class="form-control" id="register-email" type="text" value="" />
+                        <label for="register-name">User Name:</label>
+                        <input class="form-control" id="register-name" type="text" value="" />
+                        <label for="register-password">Password:</label>
+                        <input class="form-control" id="register-password" type="password" value="" />
+                        <label for="register-password-confirm">Confirm Password:</label>
+                        <input class="form-control" id="register-password-confirm" type="password" value="" />
+                    </div>
+                    <button id="register-button" class="btn btn-secondary">Register</button>
+                </form>
             </div>
-        </main>
 
-        <!-- Footer Section -->
-        <footer class="bg-dark py-3">
-            <div class="container text-center">
-                <p class="m-0">&copy; lurkforwork.com 2023</p>
+            <!-- Login Section -->
+            <div id="page-login" class="hide">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input class="form-control" id="login-email" type="text" value="" />
+                        <label for="login-password">Password:</label>
+                        <input class="form-control" id="login-password" type="password" value="" />
+                    </div>
+                    <button id="login-button" class="btn btn-secondary">Login</button>
+                </form>
             </div>
-        </footer>
+        </div>
+    </main>
 
-        <script type="module" src="src/main.js"></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
-            crossorigin="anonymous"></script>
-    </body>
+    <!-- Footer Section -->
+    <footer class="bg-dark py-3">
+        <div class="container text-center">
+            <p class="m-0">&copy; lurkforwork.com 2023</p>
+        </div>
+    </footer>
+
+    <script type="module" src="src/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>

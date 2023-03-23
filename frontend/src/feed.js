@@ -2,7 +2,7 @@
 import { apiCall } from "./helpers.js";
 
 export const populateItems = async (data, containerId) => {
-    document.getElementById(containerId).textContent = ""; 
+    document.getElementById(containerId).textContent = "";
     for (const item of data) {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
@@ -52,65 +52,67 @@ export const populateItems = async (data, containerId) => {
         const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
         extraInfo.appendChild(startingDateText);
 
-        // like and comment buttons
-        const actionsRow = document.createElement("div");
-        actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
-        cardBody.appendChild(actionsRow);
+        if (containerId === "feed-items") {
+            // like and comment buttons
+            const actionsRow = document.createElement("div");
+            actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
+            cardBody.appendChild(actionsRow);
 
-        // like button, badge and event listener
-        const likeButton = document.createElement("button");
-        likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
-        actionsRow.appendChild(likeButton);
-        const likeIcon = document.createElement("i"); // font awesome icon
-        likeIcon.className = "fas fa-thumbs-up";
-        likeButton.appendChild(likeIcon);
-        const likeText = document.createTextNode(" Likes ");
-        likeButton.appendChild(likeText);
-        const likeBadge = document.createElement("span");
-        likeBadge.className = "badge bg-danger like-badge";
-        likeBadge.textContent = item.likes.length;
-        likeButton.appendChild(likeBadge);
-        likeBadge.addEventListener("click", (event) => {
-            event.stopPropagation(); // Prevent button click event from being triggered
-            // pop up people who liked this post box
-            const likedBy = item.likes.map(user => user.userName)
-            popupLikeList(likedBy);
-        });
-        const currentUserId = localStorage.getItem("userId");
-        const userHasLiked = item.likes.find(user => user.userId == currentUserId);
-        toggleLikeButton(likeButton, userHasLiked);
-        likeButton.addEventListener('click', () => {
-            const liked = item.likes.find(user => user.userId == currentUserId);
-            console.log(liked);
-            if (liked) {
-                apiCall(`job/like`, "PUT", {"id": item.id, "turnon": false});
-            } else {
-                apiCall(`job/like`, "PUT", {"id": item.id, "turnon": true});
-            }
+            // like button, badge and event listener
+            const likeButton = document.createElement("button");
+            likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
+            actionsRow.appendChild(likeButton);
+            const likeIcon = document.createElement("i"); // font awesome icon
+            likeIcon.className = "fas fa-thumbs-up";
+            likeButton.appendChild(likeIcon);
+            const likeText = document.createTextNode(" Likes ");
+            likeButton.appendChild(likeText);
+            const likeBadge = document.createElement("span");
+            likeBadge.className = "badge bg-danger like-badge";
             likeBadge.textContent = item.likes.length;
-            const userLiked = item.likes.find(user => user.userId == currentUserId);
-            toggleLikeButton(likeButton, userLiked);
-        });
+            likeButton.appendChild(likeBadge);
+            likeBadge.addEventListener("click", (event) => {
+                event.stopPropagation(); // Prevent button click event from being triggered
+                // pop up people who liked this post box
+                const likedBy = item.likes.map(user => user.userName)
+                popupLikeList(likedBy);
+            });
+            const currentUserId = localStorage.getItem("userId");
+            const userHasLiked = item.likes.find(user => user.userId == currentUserId);
+            toggleLikeButton(likeButton, userHasLiked);
+            likeButton.addEventListener('click', () => {
+                const liked = item.likes.find(user => user.userId == currentUserId);
+                console.log(liked);
+                if (liked) {
+                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false });
+                } else {
+                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true });
+                }
+                likeBadge.textContent = item.likes.length;
+                const userLiked = item.likes.find(user => user.userId == currentUserId);
+                toggleLikeButton(likeButton, userLiked);
+            });
 
-        // comment button, badge and event listener
-        const commentButton = document.createElement("button");
-        commentButton.className = "btn btn-outline-secondary btn-sm comment-button";
-        actionsRow.appendChild(commentButton);
-        const commentIcon = document.createElement("i");
-        commentIcon.className = "fas fa-comment";
-        commentButton.appendChild(commentIcon);
-        const commentText = document.createTextNode(" Comments ");
-        commentButton.appendChild(commentText);
-        const commentBadge = document.createElement("span");
-        commentBadge.className = "badge bg-secondary";
-        commentBadge.textContent = item.comments.length;
-        commentButton.appendChild(commentBadge);
-        commentButton.addEventListener("click", (event) => {
-            // clear comment input
-            document.getElementById("comment-input").value = "";
-            // pop up comments box
-            popupCommentList(item.comments, item.id);
-        });
+            // comment button, badge and event listener
+            const commentButton = document.createElement("button");
+            commentButton.className = "btn btn-outline-secondary btn-sm comment-button";
+            actionsRow.appendChild(commentButton);
+            const commentIcon = document.createElement("i");
+            commentIcon.className = "fas fa-comment";
+            commentButton.appendChild(commentIcon);
+            const commentText = document.createTextNode(" Comments ");
+            commentButton.appendChild(commentText);
+            const commentBadge = document.createElement("span");
+            commentBadge.className = "badge bg-secondary";
+            commentBadge.textContent = item.comments.length;
+            commentButton.appendChild(commentBadge);
+            commentButton.addEventListener("click", (event) => {
+                // clear comment input
+                document.getElementById("comment-input").value = "";
+                // pop up comments box
+                popupCommentList(item.comments, item.id);
+            });
+        }
 
         document.getElementById(containerId).appendChild(feedDom);
     }
@@ -156,11 +158,11 @@ const createInfoTextElement = (text, className) => {
 
 const toggleLikeButton = (button, liked) => {
     if (liked) {
-      button.classList.remove('btn-outline-primary');
-      button.classList.add('btn-primary');
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-primary');
     } else {
-      button.classList.remove('btn-primary');
-      button.classList.add('btn-outline-primary');
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-outline-primary');
     }
 };
 
@@ -200,7 +202,7 @@ const popupCommentList = async (comments, postId) => {
     document.getElementById("comment-button").addEventListener("click", () => {
         const comment = document.getElementById("comment-input").value;
         if (comment) {
-            apiCall(`job/comment`, "POST", {"id": postId, "comment": comment});
+            apiCall(`job/comment`, "POST", { "id": postId, "comment": comment });
             document.getElementById("comment-input").value = "";
         }
     });
