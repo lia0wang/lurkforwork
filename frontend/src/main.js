@@ -117,47 +117,6 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     hide("nav-feed");
 });
 
-document.getElementById("nav-profile").addEventListener("click", async () => {
-    show("page-profile");
-    hide("page-feed");
-    show("nav-feed");
-    hide("nav-profile");
-    
-    const payload = {
-        userId: localStorage.getItem("userId"),
-    };
-    
-    const data = await apiCall("user", "GET", payload);
-    // User Profile
-    console.log(data);
-    // document.getElementById("profile-id").textContent = data.id;
-    // document.getElementById("profile-image").src = data.image;
-    // document.getElementById("profile-name").textContent = data.name;
-    // document.getElementById("profile-email").textContent = data.email;
-    
-    // Jobs
-    
-    // Watchees
-    const watchees = data.watcheeUserIds;
-    console.log(watchees);
-
-    const watcheeList = document.getElementById("profile-watchees");
-    watcheeList.textContent = "";
-    watchees.forEach(async (watcheeId) => {
-        const watcheeName = await getUsernameById(watcheeId);
-        const watcheeElement = document.createElement("li");
-        watcheeElement.textContent = watcheeName;
-        watcheeList.appendChild(watcheeElement);
-    });
-});
-
-document.getElementById("nav-feed").addEventListener("click", () => {
-    show("page-feed");
-    hide("page-profile");
-    show("nav-profile");
-    hide("nav-feed");
-});
-
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
