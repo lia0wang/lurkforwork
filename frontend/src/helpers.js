@@ -48,6 +48,11 @@ export const setUserId = (userId) => {
 
 //////////////////////////////////////////////////////// DOM HELPERS ////////////////////////////////////////////////////////
 
+export const getUsernameById = async (id) => {
+    const data = await apiCall(`user`, "GET", { userId: id });
+    return data.name;
+};
+
 export const show = (element) => {
     document.getElementById(element).classList.remove("hide");
 };
@@ -62,6 +67,7 @@ export const handleLogin = (data) => {
     hide("nav-register");
     hide("nav-login");
     show("nav-logout");
+    show("nav-profile");
 };
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////

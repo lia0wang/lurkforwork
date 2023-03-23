@@ -1,11 +1,9 @@
 
-import { apiCall, show } from "./helpers.js";
+import { apiCall } from "./helpers.js";
 
-export const populateFeed = async () => {
-    const data = await apiCall("job/feed?start=0", "GET", {});
-    document.getElementById("feed-items").textContent = "";
-
-    for (const feedItem of data) {
+export const populateItems = async (data, containerId) => {
+    document.getElementById(containerId).textContent = ""; 
+    for (const item of data) {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
 
@@ -21,7 +19,7 @@ export const populateFeed = async () => {
         imgWrapper.className = "card-img img-wrapper";
         colImg.appendChild(imgWrapper);
         const img = document.createElement("img");
-        img.src = feedItem.image;
+        img.src = item.image;
         img.className = "job-image";
         imgWrapper.appendChild(img);
 
@@ -35,23 +33,23 @@ export const populateFeed = async () => {
 
         const title = document.createElement("h5");
         title.className = "card-title";
-        title.textContent = feedItem.title;
+        title.textContent = item.title;
         cardBody.appendChild(title);
 
         const description = document.createElement("p");
         description.className = "card-text";
-        description.textContent = feedItem.description;
+        description.textContent = item.description;
         cardBody.appendChild(description);
 
         // creator, post time and starting date
         const extraInfo = document.createElement("div");
         extraInfo.className = "creator-time-wrapper";
         cardBody.appendChild(extraInfo);
-        const creatorText = createInfoTextElement("Created by: " + await getCreatorUsername(feedItem.creatorId), "card-text text-muted");
+        const creatorText = createInfoTextElement("Created by: " + await getCreatorUsername(item.creatorId), "card-text text-muted");
         extraInfo.appendChild(creatorText);
-        const createTimeText = createInfoTextElement("Posted at: " + formatTime(feedItem.createdAt), "card-text text-muted");
+        const createTimeText = createInfoTextElement("Posted at: " + formatTime(item.createdAt), "card-text text-muted");
         extraInfo.appendChild(createTimeText);
-        const startingDateText = createInfoTextElement("Starting date: " + formatTime(feedItem.start), "card-text text-muted");
+        const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
         extraInfo.appendChild(startingDateText);
 
         // like and comment buttons
@@ -70,27 +68,27 @@ export const populateFeed = async () => {
         likeButton.appendChild(likeText);
         const likeBadge = document.createElement("span");
         likeBadge.className = "badge bg-danger like-badge";
-        likeBadge.textContent = feedItem.likes.length;
+        likeBadge.textContent = item.likes.length;
         likeButton.appendChild(likeBadge);
         likeBadge.addEventListener("click", (event) => {
             event.stopPropagation(); // Prevent button click event from being triggered
             // pop up people who liked this post box
-            const likedBy = feedItem.likes.map(user => user.userName)
+            const likedBy = item.likes.map(user => user.userName)
             popupLikeList(likedBy);
         });
         const currentUserId = localStorage.getItem("userId");
-        const userHasLiked = feedItem.likes.find(user => user.userId == currentUserId);
+        const userHasLiked = item.likes.find(user => user.userId == currentUserId);
         toggleLikeButton(likeButton, userHasLiked);
         likeButton.addEventListener('click', () => {
-            const liked = feedItem.likes.find(user => user.userId == currentUserId);
+            const liked = item.likes.find(user => user.userId == currentUserId);
             console.log(liked);
             if (liked) {
-                apiCall(`job/like`, "PUT", {"id": feedItem.id, "turnon": false});
+                apiCall(`job/like`, "PUT", {"id": item.id, "turnon": false});
             } else {
-                apiCall(`job/like`, "PUT", {"id": feedItem.id, "turnon": true});
+                apiCall(`job/like`, "PUT", {"id": item.id, "turnon": true});
             }
-            likeBadge.textContent = feedItem.likes.length;
-            const userLiked = feedItem.likes.find(user => user.userId == currentUserId);
+            likeBadge.textContent = item.likes.length;
+            const userLiked = item.likes.find(user => user.userId == currentUserId);
             toggleLikeButton(likeButton, userLiked);
         });
 
@@ -105,17 +103,23 @@ export const populateFeed = async () => {
         commentButton.appendChild(commentText);
         const commentBadge = document.createElement("span");
         commentBadge.className = "badge bg-secondary";
-        commentBadge.textContent = feedItem.comments.length;
+        commentBadge.textContent = item.comments.length;
         commentButton.appendChild(commentBadge);
         commentButton.addEventListener("click", (event) => {
             // clear comment input
             document.getElementById("comment-input").value = "";
             // pop up comments box
-            popupCommentList(feedItem.comments, feedItem.id);
+            popupCommentList(item.comments, item.id);
         });
 
-        document.getElementById("feed-items").appendChild(feedDom);
+        document.getElementById(containerId).appendChild(feedDom);
     }
+};
+
+export const populateFeed = async () => {
+    const data = await apiCall("job/feed?start=0", "GET", {});
+    const containerId = "feed-items";
+    populateItems(data, containerId);
 };
 
 

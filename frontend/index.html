@@ -36,6 +36,12 @@
                         <li id="nav-login" class="nav-item">
                             <a class="nav-link text-white">Login</a>
                         </li>
+                        <li id="nav-profile" class="nav-item hide">
+                            <a class="nav-link text-white">Profile</a>
+                        </li>
+                        <li id="nav-feed" class="nav-item hide">
+                            <a class="nav-link text-white">Feed</a>
+                        </li>
                         <li id="nav-logout" class="nav-item hide">
                             <a class="nav-link text-white">Logout</a>
                         </li>
@@ -89,13 +95,27 @@
         <main role="main">
             <!-- Logged In Section -->
             <div id="section-logged-in" class="hide">
-                <div class="container">
+                <div id="page-feed" class="container">
                     <div class="feed-container">
                         <div id="feed-items"></div>
                     </div>
                 </div>
-            </div>
 
+                <!-- User Profile -->
+                <div id="page-profile" class="hide">
+                    <div id="user-info">
+                        <div id="user-avatar" src=""></div>
+                        <div id="user-id"></div>
+                        <div id="user-name"></div>
+                        <div id="user-email"></div>
+                    </div>
+                    <div id="user-jobs">Jobs Made</div>
+                    <span id="watchees-num"></span> Watching
+                    <div id="user-watchees"></div>
+                </div>
+            </div>
+                
+                  
             <!-- Logged Out Section -->
             <div id="section-logged-out">
                 <!-- Register Section -->
