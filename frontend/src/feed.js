@@ -108,7 +108,7 @@ export const populateItems = async (data, containerId) => {
             commentBadge.className = "badge bg-secondary";
             commentBadge.textContent = item.comments.length;
             commentButton.appendChild(commentBadge);
-            commentButton.addEventListener("click", (event) => {
+            commentButton.addEventListener("click", () => {
                 // clear comment input
                 document.getElementById("comment-input").value = "";
                 // pop up comments box
@@ -175,7 +175,6 @@ const showPopup = (id) => {
 
 const popupLikeList = (likedBy) => {
     const likeList = document.getElementById("like-list");
-    likeList.innerHTML = '';
 
     likedBy.forEach(name => {
         const listItem = document.createElement("li");
@@ -189,6 +188,11 @@ const popupLikeList = (likedBy) => {
 
 document.getElementById("like-close-btn").addEventListener("click", () => {
     document.getElementById("like-list-popup").style.display = "none";
+    // clear like list
+    const likeList = document.getElementById("like-list");
+    while (likeList.firstChild) {
+        likeList.removeChild(likeList.firstChild);
+    }
 });
 
 const popupCommentList = async (comments, postId) => {
@@ -223,6 +227,11 @@ const popupCommentList = async (comments, postId) => {
 
 document.getElementById("comment-close-btn").addEventListener("click", () => {
     document.getElementById("comment-list-popup").style.display = "none";
+    // remove all comments DOM node after close
+    const commentList = document.getElementById("comment-list");
+    while (commentList.firstChild) {
+        commentList.removeChild(commentList.firstChild);
+    }
 });
 
 document.getElementById("nav-add-job").addEventListener("click", () => {
