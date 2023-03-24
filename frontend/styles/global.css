@@ -117,21 +117,7 @@ header .container {
 	flex-direction: column;
 	align-items: center;
 }
-
-.drop-zone {
-    border: 2px dashed #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: border 0.3s;
-}
-
-.drop-zone--over {
-    border-color: #007bff;
-}
-
-
+  
 /* Footer CSS */
 footer {
     position: fixed;

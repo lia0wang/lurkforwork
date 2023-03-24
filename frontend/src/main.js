@@ -55,7 +55,6 @@ document.getElementById("nav-logout").addEventListener("click", () => {
     hide("nav-logout");
     hide("nav-profile");
     hide("nav-feed");
-    hide("nav-add-job");
     hide("page-profile");
     show("page-feed");
 });
@@ -133,6 +132,5 @@ if (localStorage.getItem("token")) {
     show("section-logged-in");
     show("nav-logout");
     show("nav-profile");
-    show("nav-add-job");
     populateFeed();
 }

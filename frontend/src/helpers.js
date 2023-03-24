@@ -68,7 +68,6 @@ export const handleLogin = (data) => {
     hide("nav-login");
     show("nav-logout");
     show("nav-profile");
-    show("nav-add-job");
 };
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////

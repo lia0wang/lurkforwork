@@ -1,5 +1,5 @@
-import { apiCall, fileToDataUrl } from "./helpers.js";
-import { showErrorPopup } from "./auth.js";
+
+import { apiCall } from "./helpers.js";
 
 export const populateItems = async (data, containerId) => {
     document.getElementById(containerId).textContent = "";
@@ -45,13 +45,9 @@ export const populateItems = async (data, containerId) => {
         const extraInfo = document.createElement("div");
         extraInfo.className = "creator-time-wrapper";
         cardBody.appendChild(extraInfo);
-        const creatorText = createInfoTextElement("Posted by: " + await getCreatorUsername(item.creatorId), "card-text text-muted post-creator-text");
-        // creator is clickable, leads to user profile
-        // creatorText.addEventListener("click", () => {
-        //     //TODO: jump to user profile page
-        // })
+        const creatorText = createInfoTextElement("Created by: " + await getCreatorUsername(item.creatorId), "card-text text-muted");
         extraInfo.appendChild(creatorText);
-        const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
+        const createTimeText = createInfoTextElement("Posted at: " + formatTime(item.createdAt), "card-text text-muted");
         extraInfo.appendChild(createTimeText);
         const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
         extraInfo.appendChild(startingDateText);
@@ -140,7 +136,7 @@ const formatTime = (createAt) => {
     const diffInMinutes = diffInMs / (1000 * 60);
     const diffInHours = diffInMs / (1000 * 60 * 60);
 
-    if (diffInHours < 24 && diffInHours > 0) {
+    if (diffInHours < 24) {
         const hours = Math.floor(diffInHours);
         const minutes = Math.floor(diffInMinutes % 60);
         return `${hours} hours ${minutes} minutes ago`;
@@ -224,46 +220,4 @@ const popupCommentList = async (comments, postId) => {
 
 document.getElementById("comment-close-btn").addEventListener("click", () => {
     document.getElementById("comment-list-popup").style.display = "none";
-});
-
-document.getElementById("nav-add-job").addEventListener("click", () => {
-    showPopup("add-job-popup");
-});
-
-document.getElementById("add-job-close-btn").addEventListener("click", () => {
-    document.getElementById("add-job-popup").style.display = "none";
-});
-
-document.getElementById("add-job-submit").addEventListener("click", async () => {
-    const title = document.getElementById("job-title").value;
-    const startDate = document.getElementById("job-start-date").value;
-    const description = document.getElementById("job-description").value;
-    const imageFile = document.getElementById("job-image").files[0];
-
-    if (title && startDate && description && imageFile) {
-        const imageData = await fileToDataUrl(imageFile);
-
-        const requestBody = {
-            "title": title,
-            "image": imageData,
-            "start": startDate,
-            "description": description
-        };
-
-        const response = await apiCall("job", "POST", requestBody);
-
-        if (response) {
-            // Close the popup
-            document.getElementById("add-job-popup").style.display = "none";
-            populateFeed();
-        } else {
-            // Handle error
-            showErrorPopup(response.error);
-            console.log(`Error: ${response.error}`);
-        }
-    } else {
-        // Handle missing fields
-        showErrorPopup("Missing fields");
-        console.log("Missing fields");
-    }
 });
