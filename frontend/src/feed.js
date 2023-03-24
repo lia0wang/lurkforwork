@@ -53,14 +53,14 @@ export const populateItems = async (data, containerId) => {
         const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
         extraInfo.appendChild(createTimeText);
         const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
+
         extraInfo.appendChild(startingDateText);
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
+        cardBody.appendChild(actionsRow);
 
+        // like and comment buttons
         if (containerId === "feed-items") {
-            // like and comment buttons
-            const actionsRow = document.createElement("div");
-            actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
-            cardBody.appendChild(actionsRow);
-
             // like button, badge and event listener
             const likeButton = document.createElement("button");
             likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
@@ -113,6 +113,35 @@ export const populateItems = async (data, containerId) => {
                 document.getElementById("comment-input").value = "";
                 // pop up comments box
                 popupCommentList(item.comments, item.id);
+            });
+        }
+
+        // update and delete buttons
+        if (containerId === "user-jobs") {
+            const updateButton = document.createElement("button");
+            updateButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
+            actionsRow.appendChild(updateButton);
+            const updateText = document.createTextNode(" Edit ");
+            updateButton.appendChild(updateText);
+            updateButton.addEventListener("click", () => {
+                showPopup("add-job-popup");
+                // put the job existing info into the form for editing
+                document.getElementById("add-job-popup-title").textContent = "Edit Job";
+                document.getElementById("job-title").value = item.title;
+                document.getElementById("job-description").value = item.description;
+                document.getElementById("job-start-date").value = item.start;
+            });
+            attachJobSubmitEventListener(async () => {
+                updateJob(item.id);
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "btn btn-outline-danger btn-sm";
+            actionsRow.appendChild(deleteButton);
+            const deleteText = document.createTextNode(" DELETE ");
+            deleteButton.appendChild(deleteText);
+            deleteButton.addEventListener("click", () => {
+                apiCall(`job`, "DELETE", { "id": item.id });
             });
         }
 
@@ -234,15 +263,33 @@ document.getElementById("comment-close-btn").addEventListener("click", () => {
     }
 });
 
+// change the event listener for the add-job-submit button
+let currentSubmitListener = null;
+function attachJobSubmitEventListener(listener) {
+    document.getElementById("add-job-submit").removeEventListener("click", currentSubmitListener);
+    currentSubmitListener = listener;
+    document.getElementById("add-job-submit").addEventListener("click", currentSubmitListener);
+}
+
+
 document.getElementById("nav-add-job").addEventListener("click", () => {
+    document.getElementById("add-job-popup-title").textContent = "Add a New Job";
     showPopup("add-job-popup");
+    attachJobSubmitEventListener(async () => {
+        updateJob();
+    });
 });
 
 document.getElementById("add-job-close-btn").addEventListener("click", () => {
     document.getElementById("add-job-popup").style.display = "none";
+    document.getElementById("job-title").value = "";
+    document.getElementById("job-start-date").value = "";
+    document.getElementById("job-description").value = "";
+    document.getElementById("job-image").value = "";
+    document.getElementById("add-job-submit").removeEventListener("click", updateJob);
 });
 
-document.getElementById("add-job-submit").addEventListener("click", async () => {
+const updateJob = async (id=-1) => {
     const title = document.getElementById("job-title").value;
     const startDate = document.getElementById("job-start-date").value;
     const description = document.getElementById("job-description").value;
@@ -258,7 +305,13 @@ document.getElementById("add-job-submit").addEventListener("click", async () => 
             "description": description
         };
 
-        const response = await apiCall("job", "POST", requestBody);
+        let response;
+        if (id === -1) { // create new job
+            response = await apiCall("job", "POST", requestBody);
+        } else { // update existing job
+            requestBody.id = id;
+            response = await apiCall("job", "PUT", requestBody);
+        }
 
         if (response) {
             // Close the popup
@@ -274,4 +327,5 @@ document.getElementById("add-job-submit").addEventListener("click", async () => 
         showErrorPopup("Missing fields");
         console.log("Missing fields");
     }
-});
+};
+
