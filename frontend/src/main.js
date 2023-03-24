@@ -136,6 +136,21 @@ document.getElementById("watch-button").addEventListener("click", async () => {
     };
     await apiCall("user/watch", "PUT", payload);
 });
+
+document.getElementById("watch-user-button").addEventListener("click", async () => {
+    const targetUserEmail = prompt("Enter the email of the user:");
+    if (!emailValidator(targetUserEmail)) {
+        showErrorPopup("Email format should be: example@domain.com");
+        return;
+    }
+
+    const payload = {
+        email: targetUserEmail,
+        turnon: true,
+    };
+    await apiCall("user/watch", "PUT", payload);
+});
+    
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
