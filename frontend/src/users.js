@@ -73,6 +73,7 @@ export const populateWatchees = async (data) => {
         const cardTitle = document.createElement("h5");
         cardTitle.classList.add("card-title", "mb-1");
         cardTitle.textContent = watcheeName;
+        cardTitle.style.marginTop = "-15px";
         
         const cardSubtitle = document.createElement("h6");
         cardSubtitle.classList.add("card-subtitle", "text-muted", "mb-3");
@@ -80,7 +81,10 @@ export const populateWatchees = async (data) => {
         
         const cardButton = document.createElement("button");
         cardButton.classList.add("btn", "btn-secondary", "btn-sm");
-        cardButton.textContent = "check profile";
+        cardButton.style.width = "55%";
+        cardButton.style.marginLeft = "8%";
+        cardButton.style.marginTop = "10px";
+        cardButton.textContent = "Check Profile";
         cardButton.setAttribute("id", "watchee-card-button");
         cardButton.setAttribute("value", `${watcheeId}`);
 

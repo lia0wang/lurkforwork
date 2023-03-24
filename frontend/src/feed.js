@@ -1,5 +1,6 @@
-import { apiCall, fileToDataUrl } from "./helpers.js";
+import { apiCall, fileToDataUrl, hide, show } from "./helpers.js";
 import { showErrorPopup } from "./auth.js";
+import { populateUserInfo, populateWatchees } from "./users.js";
 
 export const populateItems = async (data, containerId) => {
     document.getElementById(containerId).textContent = "";
@@ -44,11 +45,23 @@ export const populateItems = async (data, containerId) => {
         const extraInfo = document.createElement("div");
         extraInfo.className = "creator-time-wrapper";
         cardBody.appendChild(extraInfo);
+
         const creatorText = createInfoTextElement("Posted by: " + await getCreatorUsername(item.creatorId), "card-text text-muted post-creator-text");
-        // creator is clickable, leads to user profile
-        // creatorText.addEventListener("click", () => {
-        //     //TODO: jump to user profile page
-        // })
+        if (containerId === "feed-items") {
+            creatorText.addEventListener("click", async () => {
+                show("page-profile");
+                hide("page-feed");
+                show("nav-feed");
+                hide("nav-profile");
+                hide("watch-user-button");
+
+                console.log("creator clicked");
+                const data = await populateUserInfo(item.creatorId);
+                populateItems(data.jobs, "user-jobs");
+                populateWatchees(data);
+            });
+        }
+
         extraInfo.appendChild(creatorText);
         const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
         extraInfo.appendChild(createTimeText);
@@ -230,7 +243,30 @@ const popupCommentList = async (comments, postId) => {
     comments.forEach(comment => {
         const listItem = document.createElement("li");
         listItem.className = "list-group-item";
-        listItem.textContent = comment.userName + ': ' + comment.comment;
+        const listItemSpan = document.createElement("span");
+        listItemSpan.textContent = comment.userName + ': ' + comment.comment;
+        listItem.appendChild(listItemSpan);
+
+        listItem.addEventListener("click", async () => {
+            show("page-profile");
+            hide("page-feed");
+            show("nav-feed");
+            hide("nav-profile");
+            hide("watch-user-button");
+            
+            document.getElementById("comment-list-popup").style.display = "none";
+            // remove all comments DOM node after close
+            const commentList = document.getElementById("comment-list");
+            while (commentList.firstChild) {
+                commentList.removeChild(commentList.firstChild);
+            }
+
+            console.log("creator clicked");
+            const data = await populateUserInfo(comment.userId);
+            populateItems(data.jobs, "user-jobs");
+            populateWatchees(data);
+        });
+
         commentList.appendChild(listItem);
     });
 
@@ -289,7 +325,7 @@ document.getElementById("add-job-close-btn").addEventListener("click", () => {
     document.getElementById("add-job-submit").removeEventListener("click", updateJob);
 });
 
-const updateJob = async (id=-1) => {
+const updateJob = async (id = -1) => {
     const title = document.getElementById("job-title").value;
     const startDate = document.getElementById("job-start-date").value;
     const description = document.getElementById("job-description").value;

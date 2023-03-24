@@ -2,10 +2,6 @@
     padding-bottom: 60px;
 }
 
-#watch-user-button {
-    /*  */
-}
-
 .feed-card {
     max-width: 840px;
     display: flex;
@@ -86,5 +82,13 @@
 }
 
 .post-creator-text:hover {
+    cursor: pointer;
+}
+
+.list-group-item span{
+    text-decoration: underline;
+}
+
+.list-group-item:hover {
     cursor: pointer;
 }

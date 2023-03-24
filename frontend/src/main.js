@@ -54,11 +54,13 @@ document.getElementById("nav-logout").addEventListener("click", () => {
     show("nav-register");
     show("nav-login");
     hide("nav-logout");
+    hide("watch-user-button");
     hide("nav-profile");
     hide("nav-feed");
     hide("nav-add-job");
     hide("page-profile");
     show("page-feed");
+    show("watch-user-button");
 });
 
 document.getElementById("nav-profile").addEventListener("click", async () => {
@@ -66,6 +68,7 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     hide("page-feed");
     show("nav-feed");
     hide("nav-profile");
+    hide("watch-user-button");
         
     // User info
     const userId = localStorage.getItem("userId");
@@ -122,6 +125,7 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     show("page-feed");
     hide("page-profile");
     show("nav-profile");
+    show("watch-user-button");
     hide("nav-feed");
 });
 
@@ -159,6 +163,7 @@ if (localStorage.getItem("token")) {
     hide("nav-login");
     show("section-logged-in");
     show("nav-logout");
+    show("watch-user-button");
     show("nav-profile");
     show("nav-add-job");
     populateFeed();
