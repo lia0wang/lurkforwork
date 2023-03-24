@@ -125,6 +125,17 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     hide("nav-feed");
 });
 
+document.getElementById("watch-button").addEventListener("click", async () => {
+    const currentUserId = document.getElementById("user-id").textContent.slice(1); // #10648 -> 10648
+    const turnon = (document.getElementById("watch-button").textContent === "watch") ? true : false;
+    console.log(currentUserId, turnon);
+
+    const payload = {
+        id: currentUserId,
+        turnon: turnon,
+    };
+    await apiCall("user/watch", "PUT", payload);
+});
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {

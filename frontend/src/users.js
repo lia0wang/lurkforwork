@@ -7,9 +7,9 @@ export const populateUserInfo = async (userId) => {
     };
 
     const data = await apiCall("user", "GET", payload);
-
-    const cachedUserID = localStorage.getItem("userId");
+    const cachedUserID = parseInt(localStorage.getItem("userId"));
     
+    // User info
     const userAvatarElement = document.getElementById("user-avatar");
     userAvatarElement.style.backgroundImage = `url(${data.image})`;
 
@@ -30,20 +30,17 @@ export const populateUserInfo = async (userId) => {
     
     // Watch Button Logic
     const watchButton = document.getElementById("watch-button");
-
+    
     if (userId == cachedUserID) {
         hide("watch-button-container");
     } else {
-        for (const watchee of data.watcheeUserIds) {
-            if (watchee == cachedUserID) {
-                watchButton.textContent = "unwatch";
-                show("watch-button-container");
-                return data;
-            }
-        }
-        watchButton.textContent = "watch";
+        console.log(data.watcheeUserIds);
+        console.log(cachedUserID);
+        // if the cachedUserId is not in the currentUser's watcheeUserIds, show "unwatch"
+        watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch": "watch";
         show("watch-button-container");
     }
+
     return data;
 };
 
@@ -67,8 +64,8 @@ export const populateWatchees = async (data) => {
 
         const watcheeElement = document.createElement("div");
         watcheeElement.classList.add("card", "mb-3");
-        watcheeElement.style.maxWidth = "200px";
-        watcheeElement.style.maxHeight = "100px";
+        watcheeElement.style.width = "200px";
+        watcheeElement.style.height = "100px";
         
         const cardBody = document.createElement("div");
         cardBody.classList.add("card-body", "p-3");
@@ -83,7 +80,7 @@ export const populateWatchees = async (data) => {
         
         const cardButton = document.createElement("button");
         cardButton.classList.add("btn", "btn-secondary", "btn-sm");
-        cardButton.textContent = "Profile";
+        cardButton.textContent = "check profile";
         cardButton.setAttribute("id", "watchee-card-button");
         cardButton.setAttribute("value", `${watcheeId}`);
 
