@@ -2,6 +2,7 @@ import { apiCall, show, hide, handleLogin, getUsernameById } from "./helpers.js"
 import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
 import { populateFeed, populateItems } from "./feed.js";
 import { populateUserInfo, populateWatchees } from "./profile.js";
+import "./dropZone.js";
 
 document.getElementById("error-popup-close").addEventListener("click", () => {
     hide("error-popup");

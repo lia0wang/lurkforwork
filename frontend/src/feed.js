@@ -41,7 +41,6 @@ export const populateItems = async (data, containerId) => {
         description.textContent = item.description;
         cardBody.appendChild(description);
 
-        // creator, post time and starting date
         const extraInfo = document.createElement("div");
         extraInfo.className = "creator-time-wrapper";
         cardBody.appendChild(extraInfo);

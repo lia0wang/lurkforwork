@@ -8,31 +8,7 @@ export const populateUserInfo = async (userId) => {
 
     const data = await apiCall("user", "GET", payload);
 
-    // Watch Button Logic
     const cachedUserID = localStorage.getItem("userId");
-    console.log("Cached user ID:", cachedUserID);
-    console.log("Current User ID:", userId);
-    
-    const watchButton = document.getElementById("watch-button");
-
-    if (userId == cachedUserID) {
-        console.log("Hiding watch button");
-        watchButton.textContent = "BJKdkajsdkasl";
-        hide("watch-button-container");
-    } else {
-        for (const watchee of data.watcheeUserIds) {
-            console.log("Watchee:", watchee);
-            if (watchee == cachedUserID) {
-                console.log("User is already being watched");
-                watchButton.textContent = "unwatch";
-                show("watch-button-container");
-                return data;
-            }
-        }
-        console.log("User is not being watched");
-        watchButton.textContent = "watch";
-        show("watch-button-container");
-    }
     
     const userAvatarElement = document.getElementById("user-avatar");
     userAvatarElement.style.backgroundImage = `url(${data.image})`;
@@ -45,13 +21,29 @@ export const populateUserInfo = async (userId) => {
 
     const userEmailElement = document.getElementById("user-email");
     userEmailElement.textContent = `${data.email}`;
-
+    
     // Add Bootstrap classes to the elements
     userAvatarElement.classList.add("avatar");
     userIdElement.classList.add("user-info__text");
     userNameElement.classList.add("user-info__text");
     userEmailElement.classList.add("user-info__text");
     
+    // Watch Button Logic
+    const watchButton = document.getElementById("watch-button");
+
+    if (userId == cachedUserID) {
+        hide("watch-button-container");
+    } else {
+        for (const watchee of data.watcheeUserIds) {
+            if (watchee == cachedUserID) {
+                watchButton.textContent = "unwatch";
+                show("watch-button-container");
+                return data;
+            }
+        }
+        watchButton.textContent = "watch";
+        show("watch-button-container");
+    }
     return data;
 };
 
