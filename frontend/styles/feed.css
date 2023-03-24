@@ -84,3 +84,11 @@
 .post-creator-text:hover {
     cursor: pointer;
 }
+
+.list-group-item span{
+    text-decoration: underline;
+}
+
+.list-group-item:hover {
+    cursor: pointer;
+}
