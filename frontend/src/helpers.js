@@ -69,6 +69,7 @@ export const handleLogin = (data) => {
     show("nav-logout");
     show("nav-profile");
     show("nav-add-job");
+    show("watch-user-button")
 };
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
