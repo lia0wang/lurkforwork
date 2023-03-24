@@ -1,6 +1,8 @@
 import { apiCall, fileToDataUrl } from "./helpers.js";
 import { showErrorPopup } from "./auth.js";
 
+let currentJobId = null;
+
 export const populateItems = async (data, containerId) => {
     document.getElementById(containerId).textContent = "";
     for (const item of data) {
@@ -124,15 +126,13 @@ export const populateItems = async (data, containerId) => {
             const updateText = document.createTextNode(" Edit ");
             updateButton.appendChild(updateText);
             updateButton.addEventListener("click", () => {
+                currentJobId = item.id;
                 showPopup("add-job-popup");
                 // put the job existing info into the form for editing
                 document.getElementById("add-job-popup-title").textContent = "Edit Job";
                 document.getElementById("job-title").value = item.title;
                 document.getElementById("job-description").value = item.description;
                 document.getElementById("job-start-date").value = item.start;
-            });
-            attachJobSubmitEventListener(async () => {
-                updateJob(item.id);
             });
 
             const deleteButton = document.createElement("button");
@@ -263,21 +263,14 @@ document.getElementById("comment-close-btn").addEventListener("click", () => {
     }
 });
 
-// change the event listener for the add-job-submit button
-let currentSubmitListener = null;
-function attachJobSubmitEventListener(listener) {
-    document.getElementById("add-job-submit").removeEventListener("click", currentSubmitListener);
-    currentSubmitListener = listener;
-    document.getElementById("add-job-submit").addEventListener("click", currentSubmitListener);
-}
-
-
 document.getElementById("nav-add-job").addEventListener("click", () => {
+    currentJobId = -1;
     document.getElementById("add-job-popup-title").textContent = "Add a New Job";
     showPopup("add-job-popup");
-    attachJobSubmitEventListener(async () => {
-        updateJob();
-    });
+});
+
+document.getElementById("add-job-submit").addEventListener("click", async () => {
+    updateJob();
 });
 
 document.getElementById("add-job-close-btn").addEventListener("click", () => {
@@ -286,10 +279,9 @@ document.getElementById("add-job-close-btn").addEventListener("click", () => {
     document.getElementById("job-start-date").value = "";
     document.getElementById("job-description").value = "";
     document.getElementById("job-image").value = "";
-    document.getElementById("add-job-submit").removeEventListener("click", updateJob);
 });
 
-const updateJob = async (id=-1) => {
+const updateJob = async () => {
     const title = document.getElementById("job-title").value;
     const startDate = document.getElementById("job-start-date").value;
     const description = document.getElementById("job-description").value;
@@ -306,10 +298,10 @@ const updateJob = async (id=-1) => {
         };
 
         let response;
-        if (id === -1) { // create new job
+        if (currentJobId === -1) { // create new job
             response = await apiCall("job", "POST", requestBody);
         } else { // update existing job
-            requestBody.id = id;
+            requestBody.id = currentJobId;
             response = await apiCall("job", "PUT", requestBody);
         }
 
@@ -328,4 +320,3 @@ const updateJob = async (id=-1) => {
         console.log("Missing fields");
     }
 };
-
