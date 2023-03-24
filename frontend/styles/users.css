@@ -14,7 +14,6 @@
 #edit-profile-button {
     width: 100px;
     margin-top: 10px;
-    margin-left: 40px;
 }
 
 #user-info {
@@ -29,4 +28,9 @@
 
 #user-email {
     margin-top: -5px;
+}
+
+#watchees-info {
+    margin-top: 30px;
+    margin-left: 40px;
 }
