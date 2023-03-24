@@ -12,7 +12,12 @@
 }
 
 #edit-profile-button {
-    width: 100px;
+    width: 50px;
+    margin-top: 10px;
+}
+
+#watch-button {
+    width: 80px;
     margin-top: 10px;
 }
 

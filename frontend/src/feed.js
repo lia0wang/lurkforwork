@@ -82,7 +82,6 @@ export const populateItems = async (data, containerId) => {
             toggleLikeButton(likeButton, userHasLiked);
             likeButton.addEventListener('click', () => {
                 const liked = item.likes.find(user => user.userId == currentUserId);
-                console.log(liked);
                 if (liked) {
                     apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false });
                 } else {

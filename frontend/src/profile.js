@@ -1,5 +1,5 @@
 import { populateItems } from "./feed.js";
-import { apiCall, getUsernameById } from "./helpers.js";
+import { apiCall, getUsernameById, hide, show } from "./helpers.js";
 
 export const populateUserInfo = async (userId) => {
     const payload = {
@@ -8,6 +8,32 @@ export const populateUserInfo = async (userId) => {
 
     const data = await apiCall("user", "GET", payload);
 
+    // Watch Button Logic
+    const cachedUserID = localStorage.getItem("userId");
+    console.log("Cached user ID:", cachedUserID);
+    console.log("Current User ID:", userId);
+    
+    const watchButton = document.getElementById("watch-button");
+
+    if (userId == cachedUserID) {
+        console.log("Hiding watch button");
+        watchButton.textContent = "BJKdkajsdkasl";
+        hide("watch-button-container");
+    } else {
+        for (const watchee of data.watcheeUserIds) {
+            console.log("Watchee:", watchee);
+            if (watchee == cachedUserID) {
+                console.log("User is already being watched");
+                watchButton.textContent = "unwatch";
+                show("watch-button-container");
+                return data;
+            }
+        }
+        console.log("User is not being watched");
+        watchButton.textContent = "watch";
+        show("watch-button-container");
+    }
+    
     const userAvatarElement = document.getElementById("user-avatar");
     userAvatarElement.style.backgroundImage = `url(${data.image})`;
 
@@ -31,9 +57,8 @@ export const populateUserInfo = async (userId) => {
 
 export const populateWatchees = async (data) => {
     const watchees = data.watcheeUserIds;
-    console.log(`watchees: ${watchees}`);
     const numWatchees = watchees.length;
-    console.log(numWatchees);
+
     // Watchees Number
     const numWatcheesElement = document.getElementById("watchees-num");
     numWatcheesElement.textContent = numWatchees;

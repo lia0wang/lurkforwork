@@ -64,7 +64,7 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     hide("page-feed");
     show("nav-feed");
     hide("nav-profile");
-
+        
     // User info
     const userId = localStorage.getItem("userId");
     const data = await populateUserInfo(userId);
