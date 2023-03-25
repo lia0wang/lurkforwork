@@ -13,6 +13,7 @@ export const populateUserInfo = (userId) => {
             // User info
             const userAvatarElement = document.getElementById("user-avatar");
             userAvatarElement.style.backgroundImage = `url(${data.image})`;
+            userAvatarElement.alt = `${data.name}'s avatar`;
 
             const userIdElement = document.getElementById("user-id");
             userIdElement.textContent = `#${data.id}`;
