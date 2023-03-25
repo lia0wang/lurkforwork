@@ -1,6 +1,6 @@
 import { BACKEND_PORT, POLLING_INTERVAL_TIME } from "./config.js";
 import { showErrorPopup } from "./auth.js";
-import { populateFeed, pollFeed } from "./job.js";
+import { populateFeed, pollFeed } from "./jobs.js";
 
 export let pollingInterval = null;
 
