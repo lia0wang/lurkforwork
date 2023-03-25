@@ -4,9 +4,9 @@ import { populateUserInfo, populateWatchees } from "./users.js";
 
 let currentJobId = null;
 
-export const populatePostCards = async (data, containerId) => {
+export const populatePostCards = (data, containerId) => {
     document.getElementById(containerId).textContent = "";
-    for (const item of data) {
+    const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
 
@@ -48,148 +48,170 @@ export const populatePostCards = async (data, containerId) => {
         extraInfo.className = "creator-time-wrapper";
         cardBody.appendChild(extraInfo);
 
-        const creatorText = createInfoTextElement("Posted by: " + await getCreatorUsername(item.creatorId), "card-text text-muted post-creator-text");
-        if (containerId === "feed-items") {
-            creatorText.addEventListener("click", async () => {
-                show("page-profile");
-                hide("page-feed");
-                show("nav-feed");
-                hide("nav-profile");
-                hide("watch-user-button");
-
-                console.log("creator clicked");
-                const data = await populateUserInfo(item.creatorId);
-                populatePostCards(data.jobs, "user-jobs");
-                populateWatchees(data);
-            });
-        }
-
-        extraInfo.appendChild(creatorText);
-        const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
-        extraInfo.appendChild(createTimeText);
-        const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
-
-        extraInfo.appendChild(startingDateText);
-        const actionsRow = document.createElement("div");
-        actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
-        cardBody.appendChild(actionsRow);
-
-        // like and comment buttons
-        if (containerId === "feed-items") {
-            // like button, badge and event listener
-            const likeButton = document.createElement("button");
-            likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
-            actionsRow.appendChild(likeButton);
-            const likeIcon = document.createElement("i"); // font awesome icon
-            likeIcon.className = "fas fa-thumbs-up";
-            likeButton.appendChild(likeIcon);
-            const likeText = document.createTextNode(" Likes ");
-            likeButton.appendChild(likeText);
-            const likeBadge = document.createElement("span");
-            likeBadge.className = "badge bg-danger like-badge";
-            likeBadge.textContent = item.likes.length;
-            likeButton.appendChild(likeBadge);
-            likeBadge.addEventListener("click", (event) => {
-                event.stopPropagation(); // Prevent button click event from being triggered
-                // pop up people who liked this post box
-                const likedBy = item.likes.map(user => user.userName)
-                popupLikeList(likedBy);
-            });
-            const currentUserId = localStorage.getItem("userId");
-            const userHasLiked = item.likes.find(user => user.userId == currentUserId);
-            toggleLikeButton(likeButton, userHasLiked);
-            likeButton.addEventListener('click', () => {
-                const liked = item.likes.find(user => user.userId == currentUserId);
-                if (liked) {
-                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false }).then(() => {
-                        // live update like count and UI
-                        populateFeed();
-                    });
-                } else {
-                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
-                        // live update like count and UI
-                        populateFeed();
-                    });
-                }
+        const creatorTextPromise = getCreatorUsername(item.creatorId)
+            .then((creatorName) => {
+                const creatorText = createInfoTextElement("Posted by: " + creatorName, "card-text text-muted post-creator-text");
+                return creatorText;
             });
 
-            // comment button, badge and event listener
-            const commentButton = document.createElement("button");
-            commentButton.className = "btn btn-outline-secondary btn-sm comment-button";
-            actionsRow.appendChild(commentButton);
-            const commentIcon = document.createElement("i");
-            commentIcon.className = "fas fa-comment";
-            commentButton.appendChild(commentIcon);
-            const commentText = document.createTextNode(" Comments ");
-            commentButton.appendChild(commentText);
-            const commentBadge = document.createElement("span");
-            commentBadge.className = "badge bg-secondary";
-            commentBadge.textContent = item.comments.length;
-            commentButton.appendChild(commentBadge);
-            commentButton.addEventListener("click", () => {
-                // clear comment input
-                document.getElementById("comment-input").value = "";
-                // pop up comments box
-                popupCommentList(item.comments, item.id);
-            });
-        }
+        return creatorTextPromise.then((creatorText) => {
+            extraInfo.appendChild(creatorText);
+            if (containerId === "feed-items") {
+                creatorText.addEventListener("click", () => {
+                    show("page-profile");
+                    hide("page-feed");
+                    show("nav-feed");
+                    hide("nav-profile");
+                    hide("watch-user-button");
 
-        // update and delete buttons
-        if (containerId === "user-jobs") {
-            const updateButton = document.createElement("button");
-            updateButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
-            actionsRow.appendChild(updateButton);
-            const updateText = document.createTextNode(" Edit ");
-            updateButton.appendChild(updateText);
-            updateButton.addEventListener("click", () => {
-                currentJobId = item.id;
-                showPopup("add-job-popup");
-                // put the job existing info into the form for editing
-                document.getElementById("add-job-popup-title").textContent = "Edit Job";
-                document.getElementById("job-title").value = item.title;
-                document.getElementById("job-description").value = item.description;
-                document.getElementById("job-start-date").value = item.start;
-            });
+                    console.log("creator clicked");
+                    populateUserInfo(item.creatorId)
+                        .then((data) => {
+                            populatePostCards(data.jobs, "user-jobs");
+                            populateWatchees(data);
+                        });
+                });
+            }
 
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "btn btn-outline-danger btn-sm";
-            actionsRow.appendChild(deleteButton);
-            const deleteText = document.createTextNode(" DELETE ");
-            deleteButton.appendChild(deleteText);
-            deleteButton.addEventListener("click", () => {
-                apiCall(`job`, "DELETE", { "id": item.id }).then(async () => {
+            const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
+            extraInfo.appendChild(createTimeText);
+            const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
+
+            extraInfo.appendChild(startingDateText);
+            const actionsRow = document.createElement("div");
+            actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
+            cardBody.appendChild(actionsRow);
+
+            // like and comment buttons
+            if (containerId === "feed-items") {
+                // like button, badge and event listener
+                const likeButton = document.createElement("button");
+                likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
+                actionsRow.appendChild(likeButton);
+                const likeIcon = document.createElement("i"); // font awesome icon
+                likeIcon.className = "fas fa-thumbs-up";
+                likeButton.appendChild(likeIcon);
+                const likeText = document.createTextNode(" Likes ");
+                likeButton.appendChild(likeText);
+                const likeBadge = document.createElement("span");
+                likeBadge.className = "badge bg-danger like-badge";
+                likeBadge.textContent = item.likes.length;
+                likeButton.appendChild(likeBadge);
+                likeBadge.addEventListener("click", (event) => {
+                    event.stopPropagation(); // Prevent button click event from being triggered
+                    // pop up people who liked this post box
+                    const likedBy = item.likes.map(user => user.userName)
+                    popupLikeList(likedBy);
+                });
+                const currentUserId = localStorage.getItem("userId");
+                const userHasLiked = item.likes.find(user => user.userId == currentUserId);
+                toggleLikeButton(likeButton, userHasLiked);
+                likeButton.addEventListener('click', () => {
+                    const liked = item.likes.find(user => user.userId == currentUserId);
+                    if (liked) {
+                        apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false }).then(() => {
+                            // live update like count and UI
+                            populateFeed();
+                        });
+                    } else {
+                        apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
+                            // live update like count and UI
+                            populateFeed();
+                        });
+                    }
+                });
+
+                // comment button, badge and event listener
+                const commentButton = document.createElement("button");
+                commentButton.className = "btn btn-outline-secondary btn-sm comment-button";
+                actionsRow.appendChild(commentButton);
+                const commentIcon = document.createElement("i");
+                commentIcon.className = "fas fa-comment";
+                commentButton.appendChild(commentIcon);
+                const commentText = document.createTextNode(" Comments ");
+                commentButton.appendChild(commentText);
+                const commentBadge = document.createElement("span");
+                commentBadge.className = "badge bg-secondary";
+                commentBadge.textContent = item.comments.length;
+                commentButton.appendChild(commentBadge);
+                commentButton.addEventListener("click", () => {
+                    // clear comment input
+                    document.getElementById("comment-input").value = "";
+                    // pop up comments box
+                    popupCommentList(item.comments, item.id);
+                });
+            }
+
+            // update and delete buttons
+            if (containerId === "user-jobs") {
+                const updateButton = document.createElement("button");
+                updateButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
+                actionsRow.appendChild(updateButton);
+                const updateText = document.createTextNode(" Edit ");
+                updateButton.appendChild(updateText);
+                updateButton.addEventListener("click", () => {
+                    currentJobId = item.id;
+                    showPopup("add-job-popup");
+                    // put the job existing info into the form for editing
+                    document.getElementById("add-job-popup-title").textContent = "Edit Job";
+                    document.getElementById("job-title").value = item.title;
+                    document.getElementById("job-description").value = item.description;
+                    document.getElementById("job-start-date").value = item.start;
                     // live update the user profile page
                     const currentUserId = localStorage.getItem("userId");
-                    populateUserInfo(currentUserId);
-                    const newUserData = await populateUserInfo(currentUserId);
-                    populatePostCards(newUserData.jobs, "user-jobs");
-                    populateWatchees(newUserData);
+                    populateUserInfo(currentUserId)
+                        .then((newUserData) => {
+                            populatePostCards(newUserData.jobs, "user-jobs");
+                        });
                 });
-            });
-        }
 
-        document.getElementById(containerId).appendChild(feedDom);
-    }
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "btn btn-outline-danger btn-sm";
+                actionsRow.appendChild(deleteButton);
+                const deleteText = document.createTextNode(" DELETE ");
+                deleteButton.appendChild(deleteText);
+                deleteButton.addEventListener("click", () => {
+                    apiCall(`job`, "DELETE", { "id": item.id })
+                        .then(() => {
+                            // live update the user profile page
+                            const currentUserId = localStorage.getItem("userId");
+                            return populateUserInfo(currentUserId);
+                        })
+                        .then((newUserData) => {
+                            populatePostCards(newUserData.jobs, "user-jobs");
+                        })
+                });
+
+            }
+
+            document.getElementById(containerId).appendChild(feedDom);
+        });
+    });
+
+    return Promise.all(cardPromises);
 };
 
 let lastFeedLengthHash = null;
 
-export const populateFeed = async () => {
-    const data = await apiCall("job/feed?start=0", "GET", {});
-    const containerId = "feed-items";
-    populatePostCards(data, containerId);
-    lastFeedLengthHash = jsonHash(data);
+export const populateFeed = () => {
+    apiCall("job/feed?start=0", "GET", {})
+        .then((data) => {
+            const containerId = "feed-items";
+            populatePostCards(data, containerId);
+            lastFeedLengthHash = jsonHash(data);
+        })
 };
 
 // check if the server data base for /job/feed is updated by checking its hash value
 // if so call populateFeed
-export const pollFeed = async () => {
-    await apiCall("job/feed?start=0", "GET", {}).then((data) => {
-        // compare data with the last time we called populateFeed
-        if (jsonHash(data) !== lastFeedLengthHash) {
-            populateFeed();
-        }
-    });
+export const pollFeed = () => {
+    apiCall("job/feed?start=0", "GET", {})
+        .then((data) => {
+            // compare the hash value data with the last time we called populateFeed
+            if (jsonHash(data) !== lastFeedLengthHash) {
+                populateFeed();
+            }
+        })
 };
 
 // hash json data
@@ -207,10 +229,12 @@ const jsonHash = (data) => {
     return hash;
 }
 
-const getCreatorUsername = async (id) => {
-    const data = await apiCall(`user`, "GET", { userId: id });
-    return data.name;
-};
+const getCreatorUsername = (id) => {
+    return apiCall(`user`, "GET", { userId: id })
+        .then((data) => {
+            return data.name;
+        });
+};;
 
 const formatTime = (createAt) => {
     const now = new Date();
@@ -275,7 +299,7 @@ document.getElementById("like-close-btn").addEventListener("click", () => {
     }
 });
 
-const popupCommentList = async (comments, postId) => {
+const popupCommentList = (comments, postId) => {
     const commentList = document.getElementById("comment-list");
 
     comments.forEach(comment => {
@@ -285,7 +309,7 @@ const popupCommentList = async (comments, postId) => {
         listItemSpan.textContent = comment.userName + ': ' + comment.comment;
         listItem.appendChild(listItemSpan);
 
-        listItem.addEventListener("click", async () => {
+        listItem.addEventListener("click", () => {
             show("page-profile");
             hide("page-feed");
             show("nav-feed");
@@ -300,9 +324,11 @@ const popupCommentList = async (comments, postId) => {
             }
 
             console.log("creator clicked");
-            const data = await populateUserInfo(comment.userId);
-            populatePostCards(data.jobs, "user-jobs");
-            populateWatchees(data);
+            populateUserInfo(comment.userId)
+                .then((data) => {
+                    populatePostCards(data.jobs, "user-jobs");
+                    populateWatchees(data);
+                });
         });
 
         commentList.appendChild(listItem);
@@ -354,16 +380,23 @@ document.getElementById("nav-add-job").addEventListener("click", () => {
     showPopup("add-job-popup");
 });
 
-document.getElementById("add-job-submit").addEventListener("click", async () => {
-    updateJob().then(async () => {
+document.getElementById("add-job-submit").addEventListener("click", () => {
+    updateJob().then(() => {
         // live update the user profile page
         const currentUserId = localStorage.getItem("userId");
-        populateUserInfo(currentUserId);
-        const newUserData = await populateUserInfo(currentUserId);
-        populatePostCards(newUserData.jobs, "user-jobs");
-        populateWatchees(newUserData);
-    });
+        populateUserInfo(currentUserId)
+            .then((newUserData) => {
+                populatePostCards(newUserData.jobs, "user-jobs");
+                populateWatchees(newUserData);
+            });
 
+        // clear the input in the add-job-popup
+        document.getElementById("add-job-popup").style.display = "none";
+        document.getElementById("job-title").value = "";
+        document.getElementById("job-start-date").value = "";
+        document.getElementById("job-description").value = "";
+        document.getElementById("job-image").value = "";
+    });
 });
 
 document.getElementById("add-job-close-btn").addEventListener("click", () => {
@@ -374,39 +407,52 @@ document.getElementById("add-job-close-btn").addEventListener("click", () => {
     document.getElementById("job-image").value = "";
 });
 
-const updateJob = async () => {
+const updateJob = () => {
     const title = document.getElementById("job-title").value;
     const startDate = document.getElementById("job-start-date").value;
     const description = document.getElementById("job-description").value;
     const imageFile = document.getElementById("job-image").files[0];
 
     if (title && startDate && description && imageFile) {
-        const imageData = await fileToDataUrl(imageFile);
+        return fileToDataUrl(imageFile)
+            .then((imageData) => {
+                const requestBody = {
+                    "title": title,
+                    "image": imageData,
+                    "start": startDate,
+                    "description": description
+                };
 
-        const requestBody = {
-            "title": title,
-            "image": imageData,
-            "start": startDate,
-            "description": description
-        };
-
-        let response;
-        if (currentJobId === -1) { // create new job
-            response = await apiCall("job", "POST", requestBody);
-        } else { // update existing job
-            requestBody.id = currentJobId;
-            response = await apiCall("job", "PUT", requestBody);
-        }
-
-        if (response) {
-            // Close the popup
-            document.getElementById("add-job-popup").style.display = "none";
-            populateFeed();
-        } else {
-            // Handle error
-            showErrorPopup(response.error);
-            console.log(`Error: ${response.error}`);
-        }
+                let response;
+                if (currentJobId === -1) { // create new job
+                    return apiCall("job", "POST", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                } else { // update existing job
+                    requestBody.id = currentJobId;
+                    return apiCall("job", "PUT", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                }
+            });
     } else {
         // Handle missing fields
         showErrorPopup("Missing fields");

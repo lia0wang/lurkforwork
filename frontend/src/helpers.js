@@ -52,9 +52,11 @@ export const setUserId = (userId) => {
 
 //////////////////////////////////////////////////////// DOM HELPERS ////////////////////////////////////////////////////////
 
-export const getUsernameById = async (id) => {
-    const data = await apiCall(`user`, "GET", { userId: id });
-    return data.name;
+export const getUsernameById = (id) => {
+    return apiCall(`user`, "GET", { userId: id })
+        .then((data) => {
+            return data.name;
+        })
 };
 
 export const show = (element) => {
