@@ -157,6 +157,7 @@ document.getElementById("watch-user-button").addEventListener("click", () => {
 
 const displayPage = () => {
     const hash = window.location.hash;
+    console.log(window.location);
     if (hash === "#page-register") {
         hide("page-login");
         show("page-register");
@@ -178,6 +179,9 @@ const displayPage = () => {
     }
 };
 
+window.addEventListener("hashchange", displayPage);
+window.addEventListener("load", displayPage);
+
 document.getElementById("nav-register").addEventListener("click", () => {
     updateUrl("#page-register");
 });
@@ -187,10 +191,6 @@ const updateUrl = (url) => {
     const fragment = url.split("#")[1];
     history.pushState({}, "", `#${fragment}`);
 };
-
-window.addEventListener("hashchange", displayPage);
-window.addEventListener("load", displayPage);
-
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
