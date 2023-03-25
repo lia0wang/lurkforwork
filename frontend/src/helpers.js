@@ -1,6 +1,10 @@
-import { BACKEND_PORT } from "./config.js";
+import { BACKEND_PORT, POLLING_INTERVAL_TIME } from "./config.js";
 import { showErrorPopup } from "./auth.js";
-import { populateFeed } from "./feed.js";
+import { populateFeed } from "./job.js";
+
+export let pollingInterval = null;
+
+
 /**
  * Given a js file object representing a jpg or png image, such as one taken
  * from a html file input element, return a promise which resolves to the file
@@ -64,12 +68,20 @@ export const hide = (element) => {
 export const handleLogin = (data) => {
     setToken(data.token);
     setUserId(data.userId)
+    handleLoginUI();
+};
+
+export const handleLoginUI = () => {
+    hide("section-logged-out");
     hide("nav-register");
     hide("nav-login");
     show("nav-logout");
     show("nav-profile");
     show("nav-add-job");
     show("watch-user-button")
+    show("section-logged-in");
+    // Polling for new posts, likes and comments every POLLING_INTERVAL_TIME seconds
+    pollingInterval = setInterval(populateFeed, POLLING_INTERVAL_TIME);
 };
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////

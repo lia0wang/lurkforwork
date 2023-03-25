@@ -1,6 +1,6 @@
-import { apiCall, show, hide, handleLogin, getUsernameById } from "./helpers.js";
+import { apiCall, show, hide, handleLogin, handleLoginUI, getUsernameById, pollingInterval } from "./helpers.js";
 import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
-import { populateFeed, populateItems } from "./feed.js";
+import { populateFeed, populatePostCards } from "./job.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 import "./dropZone.js";
 
@@ -61,6 +61,8 @@ document.getElementById("nav-logout").addEventListener("click", () => {
     hide("page-profile");
     show("page-feed");
     show("watch-user-button");
+    // stop polling
+    clearInterval(pollingInterval);
 });
 
 document.getElementById("nav-profile").addEventListener("click", async () => {
@@ -69,7 +71,7 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     show("nav-feed");
     hide("nav-profile");
     hide("watch-user-button");
-        
+
     // User info
     const userId = localStorage.getItem("userId");
     const data = await populateUserInfo(userId);
@@ -77,7 +79,7 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     // Jobs
     const jobs = data.jobs;
     const containerId = "user-jobs";
-    populateItems(jobs, containerId);
+    populatePostCards(jobs, containerId);
 
     // Watchees
     populateWatchees(data);
@@ -154,17 +156,10 @@ document.getElementById("watch-user-button").addEventListener("click", async () 
     };
     await apiCall("user/watch", "PUT", payload);
 });
-    
+
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
-    hide("section-logged-out");
-    hide("nav-register");
-    hide("nav-login");
-    show("section-logged-in");
-    show("nav-logout");
-    show("watch-user-button");
-    show("nav-profile");
-    show("nav-add-job");
+    handleLoginUI();
     populateFeed();
 }
