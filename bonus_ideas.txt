@@ -1,9 +1,0 @@
-1. animations
-
-2. The "drag/drop" aspect of uploading a file can be part of bonus marks.
-https://edstem.org/au/courses/10892/discussion/1226191
-
-3. input validation for name, email, and passwords
-https://edstem.org/au/courses/10892/discussion/1210477
-
-4. aesthetics visual design
