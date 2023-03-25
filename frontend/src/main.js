@@ -127,6 +127,17 @@ document.getElementById("watch-button").addEventListener("click", () => {
         turnon: turnon,
     };
     apiCall("user/watch", "PUT", payload);
+    
+    populateUserInfo(currentUserId)
+    .then((data) => {
+        // Jobs
+        const jobs = data.jobs;
+        const containerId = "user-jobs";
+        populatePostCards(jobs, containerId);
+
+        // Watchees
+        populateWatchees(data);
+    });
 });
 
 document.getElementById("watch-user-button").addEventListener("click", () => {
