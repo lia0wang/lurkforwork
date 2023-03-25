@@ -4,7 +4,7 @@ import { populateUserInfo, populateWatchees } from "./users.js";
 
 let currentJobId = null;
 
-export const populateItems = async (data, containerId) => {
+export const populatePostCards = async (data, containerId) => {
     document.getElementById(containerId).textContent = "";
     for (const item of data) {
         const feedDom = document.createElement("div");
@@ -59,7 +59,7 @@ export const populateItems = async (data, containerId) => {
 
                 console.log("creator clicked");
                 const data = await populateUserInfo(item.creatorId);
-                populateItems(data.jobs, "user-jobs");
+                populatePostCards(data.jobs, "user-jobs");
                 populateWatchees(data);
             });
         }
@@ -154,7 +154,14 @@ export const populateItems = async (data, containerId) => {
             const deleteText = document.createTextNode(" DELETE ");
             deleteButton.appendChild(deleteText);
             deleteButton.addEventListener("click", () => {
-                apiCall(`job`, "DELETE", { "id": item.id });
+                apiCall(`job`, "DELETE", { "id": item.id }).then(async () => {
+                    // live update the user profile page
+                    const currentUserId = localStorage.getItem("userId");
+                    populateUserInfo(currentUserId);
+                    const newUserData = await populateUserInfo(currentUserId);
+                    populatePostCards(newUserData.jobs, "user-jobs");
+                    populateWatchees(newUserData);
+                });
             });
         }
 
@@ -165,9 +172,8 @@ export const populateItems = async (data, containerId) => {
 export const populateFeed = async () => {
     const data = await apiCall("job/feed?start=0", "GET", {});
     const containerId = "feed-items";
-    populateItems(data, containerId);
+    populatePostCards(data, containerId);
 };
-
 
 const getCreatorUsername = async (id) => {
     const data = await apiCall(`user`, "GET", { userId: id });
@@ -253,7 +259,7 @@ const popupCommentList = async (comments, postId) => {
             show("nav-feed");
             hide("nav-profile");
             hide("watch-user-button");
-            
+
             document.getElementById("comment-list-popup").style.display = "none";
             // remove all comments DOM node after close
             const commentList = document.getElementById("comment-list");
@@ -263,7 +269,7 @@ const popupCommentList = async (comments, postId) => {
 
             console.log("creator clicked");
             const data = await populateUserInfo(comment.userId);
-            populateItems(data.jobs, "user-jobs");
+            populatePostCards(data.jobs, "user-jobs");
             populateWatchees(data);
         });
 
@@ -276,6 +282,17 @@ const popupCommentList = async (comments, postId) => {
             apiCall(`job/comment`, "POST", { "id": postId, "comment": comment });
             document.getElementById("comment-input").value = "";
         }
+        // live update comment list
+        apiCall('job/feed?start=0', "GET", { "id": postId }).then((data) => {
+            document.getElementById("comment-list-popup").style.display = "none";
+            // remove all comments DOM node after close
+            const commentList = document.getElementById("comment-list");
+            while (commentList.firstChild) {
+                commentList.removeChild(commentList.firstChild);
+            }
+            comments = data.find((item) => item.id === postId).comments;
+            popupCommentList(comments, postId);
+        });
     });
 
     // User can press enter to submit comment
@@ -306,7 +323,15 @@ document.getElementById("nav-add-job").addEventListener("click", () => {
 });
 
 document.getElementById("add-job-submit").addEventListener("click", async () => {
-    updateJob();
+    updateJob().then(async () => {
+        // live update the user profile page
+        const currentUserId = localStorage.getItem("userId");
+        populateUserInfo(currentUserId);
+        const newUserData = await populateUserInfo(currentUserId);
+        populatePostCards(newUserData.jobs, "user-jobs");
+        populateWatchees(newUserData);
+    });
+
 });
 
 document.getElementById("add-job-close-btn").addEventListener("click", () => {
