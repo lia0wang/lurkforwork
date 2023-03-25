@@ -1,52 +1,53 @@
 import { populatePostCards } from "./jobs.js";
 import { apiCall, getUsernameById, hide, show } from "./helpers.js";
 
-export const populateUserInfo = async (userId) => {
+export const populateUserInfo = (userId) => {
     const payload = {
         userId: userId,
     };
 
-    const data = await apiCall("user", "GET", payload);
-    const cachedUserID = parseInt(localStorage.getItem("userId"));
+    return apiCall("user", "GET", payload)
+        .then((data) => {
+            const cachedUserID = parseInt(localStorage.getItem("userId"));
 
-    // User info
-    const userAvatarElement = document.getElementById("user-avatar");
-    userAvatarElement.style.backgroundImage = `url(${data.image})`;
+            // User info
+            const userAvatarElement = document.getElementById("user-avatar");
+            userAvatarElement.style.backgroundImage = `url(${data.image})`;
 
-    const userIdElement = document.getElementById("user-id");
-    userIdElement.textContent = `#${data.id}`;
+            const userIdElement = document.getElementById("user-id");
+            userIdElement.textContent = `#${data.id}`;
 
-    const userNameElement = document.getElementById("user-name");
-    userNameElement.textContent = `${data.name}`;
+            const userNameElement = document.getElementById("user-name");
+            userNameElement.textContent = `${data.name}`;
 
-    const userEmailElement = document.getElementById("user-email");
-    userEmailElement.textContent = `${data.email}`;
+            const userEmailElement = document.getElementById("user-email");
+            userEmailElement.textContent = `${data.email}`;
 
-    // Add Bootstrap classes to the elements
-    userAvatarElement.classList.add("avatar");
-    userIdElement.classList.add("user-info__text");
-    userNameElement.classList.add("user-info__text");
-    userEmailElement.classList.add("user-info__text");
+            // Add Bootstrap classes to the elements
+            userAvatarElement.classList.add("avatar");
+            userIdElement.classList.add("user-info__text");
+            userNameElement.classList.add("user-info__text");
+            userEmailElement.classList.add("user-info__text");
 
-    // Watch Button Logic
-    const watchButton = document.getElementById("watch-button");
+            // Watch Button Logic
+            const watchButton = document.getElementById("watch-button");
 
-    if (userId == cachedUserID) {
-        show("edit-profile-button-container");
-        hide("watch-button-container");
-    } else {
-        console.log(data.watcheeUserIds);
-        console.log(cachedUserID);
-        // if the cachedUserId is not in the currentUser's watcheeUserIds, show "unwatch"
-        watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch": "watch";
-        show("watch-button-container");
-        hide("edit-profile-button-container");
-    }
-
-    return data;
+            if (userId == cachedUserID) {
+                show("edit-profile-button-container");
+                hide("watch-button-container");
+            } else {
+                console.log(data.watcheeUserIds);
+                console.log(cachedUserID);
+                // if the cachedUserId is not in the currentUser's watcheeUserIds, show "unwatch"
+                watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch": "watch";
+                show("watch-button-container");
+                hide("edit-profile-button-container");
+            }
+            return data;
+        });
 };
 
-export const populateWatchees = async (data) => {
+export const populateWatchees = (data) => {
     const watchees = data.watcheeUserIds;
     const numWatchees = watchees.length;
 
@@ -61,8 +62,6 @@ export const populateWatchees = async (data) => {
         const payload = {
             userId: watcheeId,
         };
-        const watcheeInfo = await apiCall("user", "GET", payload);
-        const watcheeName = await getUsernameById(watcheeId);
 
         const watcheeElement = document.createElement("div");
         watcheeElement.classList.add("card", "mb-3");
@@ -74,13 +73,15 @@ export const populateWatchees = async (data) => {
 
         const cardTitle = document.createElement("h5");
         cardTitle.classList.add("card-title", "mb-1");
-        cardTitle.textContent = watcheeName;
         cardTitle.style.marginTop = "-15px";
 
         const cardSubtitle = document.createElement("h6");
         cardSubtitle.classList.add("card-subtitle", "text-muted", "mb-3");
-        cardSubtitle.textContent = watcheeInfo.email;
-
+        apiCall("user", "GET", payload)
+            .then((watcheeInfo) => {
+                cardSubtitle.textContent = watcheeInfo.email;
+                cardTitle.textContent = watcheeInfo.name;
+            });
         const cardButton = document.createElement("button");
         cardButton.classList.add("btn", "btn-secondary", "btn-sm");
         cardButton.style.width = "55%";
@@ -96,11 +97,13 @@ export const populateWatchees = async (data) => {
         watcheeElement.appendChild(cardBody);
         watcheesContainer.appendChild(watcheeElement);
 
-        cardButton.addEventListener("click", async () => {
+        cardButton.addEventListener("click", () => {
             // Populate the profile page with the watchee's info
-            const data = await populateUserInfo(watcheeId);
-            populatePostCards(data.jobs, "user-jobs");
-            populateWatchees(data);
+            populateUserInfo(watcheeId)
+                .then((data) => {
+                    populatePostCards(data.jobs, "user-jobs");
+                    populateWatchees(data);
+                });
         });
     }
 };
