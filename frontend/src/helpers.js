@@ -1,6 +1,10 @@
-import { BACKEND_PORT } from "./config.js";
+import { BACKEND_PORT, POLLING_INTERVAL_TIME } from "./config.js";
 import { showErrorPopup } from "./auth.js";
-import { populateFeed } from "./feed.js";
+import { populateFeed, pollFeed } from "./job.js";
+
+export let pollingInterval = null;
+
+
 /**
  * Given a js file object representing a jpg or png image, such as one taken
  * from a html file input element, return a promise which resolves to the file
@@ -64,13 +68,42 @@ export const hide = (element) => {
 export const handleLogin = (data) => {
     setToken(data.token);
     setUserId(data.userId)
+    handleLoginUI();
+};
+
+export const handleLoginUI = () => {
+    hide("section-logged-out");
     hide("nav-register");
     hide("nav-login");
     show("nav-logout");
     show("nav-profile");
     show("nav-add-job");
     show("watch-user-button")
+    show("section-logged-in");
+    // Polling for new posts, likes and comments every POLLING_INTERVAL_TIME seconds
+    pollingInterval = setInterval(pollFeed, POLLING_INTERVAL_TIME);
 };
+
+export const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    show("section-logged-out");
+    hide("section-logged-in");
+    show("nav-register");
+    show("nav-login");
+    hide("nav-logout");
+    hide("watch-user-button");
+    hide("nav-profile");
+    hide("nav-feed");
+    hide("nav-add-job");
+    hide("page-profile");
+    show("page-feed");
+    show("watch-user-button");
+    hide("watch-user-button")
+    // stop polling
+    clearInterval(pollingInterval);
+};
+
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
 

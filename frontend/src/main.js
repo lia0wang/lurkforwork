@@ -1,6 +1,6 @@
-import { apiCall, show, hide, handleLogin } from "./helpers.js";
+import { apiCall, show, hide, handleLogin, handleLoginUI, getUsernameById, handleLogout } from "./helpers.js";
 import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
-import { populateFeed, populateItems } from "./feed.js";
+import { populateFeed, populatePostCards } from "./job.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 import "./dropZone.js";
 
@@ -47,19 +47,7 @@ document.getElementById("register-button").addEventListener("click", (event) => 
 });
 
 document.getElementById("nav-logout").addEventListener("click", () => {
-    show("section-logged-out");
-    hide("section-logged-in");
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    show("nav-register");
-    show("nav-login");
-    hide("nav-logout");
-    hide("watch-user-button");
-    hide("nav-profile");
-    hide("nav-feed");
-    hide("nav-add-job");
-    hide("page-profile");
-    show("page-feed");
+    handleLogout();
 });
 
 document.getElementById("nav-profile").addEventListener("click", async () => {
@@ -68,7 +56,7 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     show("nav-feed");
     hide("nav-profile");
     hide("watch-user-button");
-        
+
     // User info
     const userId = localStorage.getItem("userId");
     const data = await populateUserInfo(userId);
@@ -76,7 +64,7 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
     // Jobs
     const jobs = data.jobs;
     const containerId = "user-jobs";
-    populateItems(jobs, containerId);
+    populatePostCards(jobs, containerId);
 
     // Watchees
     populateWatchees(data);
@@ -192,13 +180,6 @@ window.addEventListener("load", displayPage);
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
-    hide("section-logged-out");
-    hide("nav-register");
-    hide("nav-login");
-    show("section-logged-in");
-    show("nav-logout");
-    show("watch-user-button");
-    show("nav-profile");
-    show("nav-add-job");
+    handleLoginUI();
     populateFeed();
 }
