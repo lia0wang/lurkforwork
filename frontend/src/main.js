@@ -50,7 +50,7 @@ document.getElementById("nav-logout").addEventListener("click", () => {
     handleLogout();
 });
 
-document.getElementById("nav-profile").addEventListener("click", async () => {
+document.getElementById("nav-profile").addEventListener("click", () => {
     show("page-profile");
     hide("page-feed");
     show("nav-feed");
@@ -59,18 +59,19 @@ document.getElementById("nav-profile").addEventListener("click", async () => {
 
     // User info
     const userId = localStorage.getItem("userId");
-    const data = await populateUserInfo(userId);
+    populateUserInfo(userId)
+        .then((data) => {
+            // Jobs
+            const jobs = data.jobs;
+            const containerId = "user-jobs";
+            populatePostCards(jobs, containerId);
 
-    // Jobs
-    const jobs = data.jobs;
-    const containerId = "user-jobs";
-    populatePostCards(jobs, containerId);
-
-    // Watchees
-    populateWatchees(data);
+            // Watchees
+            populateWatchees(data);
+        });
 });
 
-document.getElementById("edit-profile-button").addEventListener("click", async () => {
+document.getElementById("edit-profile-button").addEventListener("click", () => {
     const userAvatar = document.getElementById("user-avatar");
     const userName = document.getElementById("user-name");
     const userEmail = document.getElementById("user-email");
@@ -105,7 +106,7 @@ document.getElementById("edit-profile-button").addEventListener("click", async (
         image: image,
     };
 
-    await apiCall("user", "PUT", payload);
+    apiCall("user", "PUT", payload);
 });
 
 document.getElementById("nav-feed").addEventListener("click", () => {
@@ -116,7 +117,7 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     hide("nav-feed");
 });
 
-document.getElementById("watch-button").addEventListener("click", async () => {
+document.getElementById("watch-button").addEventListener("click", () => {
     const currentUserId = document.getElementById("user-id").textContent.slice(1); // #10648 -> 10648
     const turnon = (document.getElementById("watch-button").textContent === "watch") ? true : false;
     console.log(currentUserId, turnon);
@@ -125,12 +126,22 @@ document.getElementById("watch-button").addEventListener("click", async () => {
         id: currentUserId,
         turnon: turnon,
     };
-    await apiCall("user/watch", "PUT", payload);
+    apiCall("user/watch", "PUT", payload);
     
-    populateUserInfo(currentUserId);
+    populateUserInfo(currentUserId)
+    .then((data) => {
+        // Jobs
+        const jobs = data.jobs;
+        const containerId = "user-jobs";
+        populatePostCards(jobs, containerId);
+
+        // Watchees
+        populateWatchees(data);
+    });
+
 });
 
-document.getElementById("watch-user-button").addEventListener("click", async () => {
+document.getElementById("watch-user-button").addEventListener("click", () => {
     const targetUserEmail = prompt("Enter the email of the user:");
     if (!emailValidator(targetUserEmail)) {
         showErrorPopup("Email format should be: example@domain.com");
@@ -141,7 +152,7 @@ document.getElementById("watch-user-button").addEventListener("click", async () 
         email: targetUserEmail,
         turnon: true,
     };
-    await apiCall("user/watch", "PUT", payload);
+    apiCall("user/watch", "PUT", payload);
 });
 
 const displayPage = () => {
