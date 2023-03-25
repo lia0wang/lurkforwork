@@ -126,6 +126,8 @@ document.getElementById("watch-button").addEventListener("click", async () => {
         turnon: turnon,
     };
     await apiCall("user/watch", "PUT", payload);
+    
+    populateUserInfo(currentUserId);
 });
 
 document.getElementById("watch-user-button").addEventListener("click", async () => {
