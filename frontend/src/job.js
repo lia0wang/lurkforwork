@@ -101,13 +101,16 @@ export const populatePostCards = async (data, containerId) => {
             likeButton.addEventListener('click', () => {
                 const liked = item.likes.find(user => user.userId == currentUserId);
                 if (liked) {
-                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false });
+                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false }).then(() => {
+                        // live update like count and UI
+                        populateFeed();
+                    });
                 } else {
-                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true });
+                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
+                        // live update like count and UI
+                        populateFeed();
+                    });
                 }
-                likeBadge.textContent = item.likes.length;
-                const userLiked = item.likes.find(user => user.userId == currentUserId);
-                toggleLikeButton(likeButton, userLiked);
             });
 
             // comment button, badge and event listener
