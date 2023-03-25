@@ -54,6 +54,117 @@ export const populatePostCards = (data, containerId) => {
                 return creatorText;
             });
 
+        const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
+        extraInfo.appendChild(createTimeText);
+        const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
+
+        extraInfo.appendChild(startingDateText);
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
+        cardBody.appendChild(actionsRow);
+
+        // like and comment buttons
+        if (containerId === "feed-items") {
+            // like button, badge and event listener
+            const likeButton = document.createElement("button");
+            likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
+            actionsRow.appendChild(likeButton);
+            const likeIcon = document.createElement("i"); // font awesome icon
+            likeIcon.className = "fas fa-thumbs-up";
+            likeButton.appendChild(likeIcon);
+            const likeText = document.createTextNode(" Likes ");
+            likeButton.appendChild(likeText);
+            const likeBadge = document.createElement("span");
+            likeBadge.className = "badge bg-danger like-badge";
+            likeBadge.textContent = item.likes.length;
+            likeButton.appendChild(likeBadge);
+            likeBadge.addEventListener("click", (event) => {
+                event.stopPropagation(); // Prevent button click event from being triggered
+                // pop up people who liked this post box
+                const likedBy = item.likes.map(user => user.userName)
+                popupLikeList(likedBy);
+            });
+            const currentUserId = localStorage.getItem("userId");
+            const userHasLiked = item.likes.find(user => user.userId == currentUserId);
+            toggleLikeButton(likeButton, userHasLiked);
+            likeButton.addEventListener('click', () => {
+                const liked = item.likes.find(user => user.userId == currentUserId);
+                if (liked) {
+                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false }).then(() => {
+                        // live update like count and UI
+                        populateFeed();
+                    });
+                } else {
+                    apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
+                        // live update like count and UI
+                        populateFeed();
+                    });
+                }
+            });
+
+            // comment button, badge and event listener
+            const commentButton = document.createElement("button");
+            commentButton.className = "btn btn-outline-secondary btn-sm comment-button";
+            actionsRow.appendChild(commentButton);
+            const commentIcon = document.createElement("i");
+            commentIcon.className = "fas fa-comment";
+            commentButton.appendChild(commentIcon);
+            const commentText = document.createTextNode(" Comments ");
+            commentButton.appendChild(commentText);
+            const commentBadge = document.createElement("span");
+            commentBadge.className = "badge bg-secondary";
+            commentBadge.textContent = item.comments.length;
+            commentButton.appendChild(commentBadge);
+            commentButton.addEventListener("click", () => {
+                // clear comment input
+                document.getElementById("comment-input").value = "";
+                // pop up comments box
+                popupCommentList(item.comments, item.id);
+            });
+        }
+
+        // update and delete buttons
+        if (containerId === "user-jobs") {
+            const updateButton = document.createElement("button");
+            updateButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
+            actionsRow.appendChild(updateButton);
+            const updateText = document.createTextNode(" Edit ");
+            updateButton.appendChild(updateText);
+            updateButton.addEventListener("click", () => {
+                currentJobId = item.id;
+                showPopup("add-job-popup");
+                // put the job existing info into the form for editing
+                document.getElementById("add-job-popup-title").textContent = "Edit Job";
+                document.getElementById("job-title").value = item.title;
+                document.getElementById("job-description").value = item.description;
+                document.getElementById("job-start-date").value = item.start;
+                // live update the user profile page
+                const currentUserId = localStorage.getItem("userId");
+                populateUserInfo(currentUserId)
+                    .then((newUserData) => {
+                        populatePostCards(newUserData.jobs, "user-jobs");
+                    });
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "btn btn-outline-danger btn-sm";
+            actionsRow.appendChild(deleteButton);
+            const deleteText = document.createTextNode(" DELETE ");
+            deleteButton.appendChild(deleteText);
+            deleteButton.addEventListener("click", () => {
+                apiCall(`job`, "DELETE", { "id": item.id })
+                    .then(() => {
+                        // live update the user profile page
+                        const currentUserId = localStorage.getItem("userId");
+                        return populateUserInfo(currentUserId);
+                    })
+                    .then((newUserData) => {
+                        populatePostCards(newUserData.jobs, "user-jobs");
+                    })
+            });
+
+        }
+
         return creatorTextPromise.then((creatorText) => {
             extraInfo.appendChild(creatorText);
             if (containerId === "feed-items") {
@@ -64,7 +175,6 @@ export const populatePostCards = (data, containerId) => {
                     hide("nav-profile");
                     hide("watch-user-button");
 
-                    console.log("creator clicked");
                     populateUserInfo(item.creatorId)
                         .then((data) => {
                             populatePostCards(data.jobs, "user-jobs");
@@ -72,118 +182,6 @@ export const populatePostCards = (data, containerId) => {
                         });
                 });
             }
-
-            const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
-            extraInfo.appendChild(createTimeText);
-            const startingDateText = createInfoTextElement("Starting date: " + formatTime(item.start), "card-text text-muted");
-
-            extraInfo.appendChild(startingDateText);
-            const actionsRow = document.createElement("div");
-            actionsRow.className = "d-flex justify-content-start align-items-center mt-2 actions-row";
-            cardBody.appendChild(actionsRow);
-
-            // like and comment buttons
-            if (containerId === "feed-items") {
-                // like button, badge and event listener
-                const likeButton = document.createElement("button");
-                likeButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
-                actionsRow.appendChild(likeButton);
-                const likeIcon = document.createElement("i"); // font awesome icon
-                likeIcon.className = "fas fa-thumbs-up";
-                likeButton.appendChild(likeIcon);
-                const likeText = document.createTextNode(" Likes ");
-                likeButton.appendChild(likeText);
-                const likeBadge = document.createElement("span");
-                likeBadge.className = "badge bg-danger like-badge";
-                likeBadge.textContent = item.likes.length;
-                likeButton.appendChild(likeBadge);
-                likeBadge.addEventListener("click", (event) => {
-                    event.stopPropagation(); // Prevent button click event from being triggered
-                    // pop up people who liked this post box
-                    const likedBy = item.likes.map(user => user.userName)
-                    popupLikeList(likedBy);
-                });
-                const currentUserId = localStorage.getItem("userId");
-                const userHasLiked = item.likes.find(user => user.userId == currentUserId);
-                toggleLikeButton(likeButton, userHasLiked);
-                likeButton.addEventListener('click', () => {
-                    const liked = item.likes.find(user => user.userId == currentUserId);
-                    if (liked) {
-                        apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false }).then(() => {
-                            // live update like count and UI
-                            populateFeed();
-                        });
-                    } else {
-                        apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
-                            // live update like count and UI
-                            populateFeed();
-                        });
-                    }
-                });
-
-                // comment button, badge and event listener
-                const commentButton = document.createElement("button");
-                commentButton.className = "btn btn-outline-secondary btn-sm comment-button";
-                actionsRow.appendChild(commentButton);
-                const commentIcon = document.createElement("i");
-                commentIcon.className = "fas fa-comment";
-                commentButton.appendChild(commentIcon);
-                const commentText = document.createTextNode(" Comments ");
-                commentButton.appendChild(commentText);
-                const commentBadge = document.createElement("span");
-                commentBadge.className = "badge bg-secondary";
-                commentBadge.textContent = item.comments.length;
-                commentButton.appendChild(commentBadge);
-                commentButton.addEventListener("click", () => {
-                    // clear comment input
-                    document.getElementById("comment-input").value = "";
-                    // pop up comments box
-                    popupCommentList(item.comments, item.id);
-                });
-            }
-
-            // update and delete buttons
-            if (containerId === "user-jobs") {
-                const updateButton = document.createElement("button");
-                updateButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
-                actionsRow.appendChild(updateButton);
-                const updateText = document.createTextNode(" Edit ");
-                updateButton.appendChild(updateText);
-                updateButton.addEventListener("click", () => {
-                    currentJobId = item.id;
-                    showPopup("add-job-popup");
-                    // put the job existing info into the form for editing
-                    document.getElementById("add-job-popup-title").textContent = "Edit Job";
-                    document.getElementById("job-title").value = item.title;
-                    document.getElementById("job-description").value = item.description;
-                    document.getElementById("job-start-date").value = item.start;
-                    // live update the user profile page
-                    const currentUserId = localStorage.getItem("userId");
-                    populateUserInfo(currentUserId)
-                        .then((newUserData) => {
-                            populatePostCards(newUserData.jobs, "user-jobs");
-                        });
-                });
-
-                const deleteButton = document.createElement("button");
-                deleteButton.className = "btn btn-outline-danger btn-sm";
-                actionsRow.appendChild(deleteButton);
-                const deleteText = document.createTextNode(" DELETE ");
-                deleteButton.appendChild(deleteText);
-                deleteButton.addEventListener("click", () => {
-                    apiCall(`job`, "DELETE", { "id": item.id })
-                        .then(() => {
-                            // live update the user profile page
-                            const currentUserId = localStorage.getItem("userId");
-                            return populateUserInfo(currentUserId);
-                        })
-                        .then((newUserData) => {
-                            populatePostCards(newUserData.jobs, "user-jobs");
-                        })
-                });
-
-            }
-
             document.getElementById(containerId).appendChild(feedDom);
         });
     });
@@ -334,10 +332,16 @@ const popupCommentList = (comments, postId) => {
         commentList.appendChild(listItem);
     });
 
-    document.getElementById("comment-button").addEventListener("click", () => {
-        const comment = document.getElementById("comment-input").value;
-        if (comment) {
-            apiCall(`job/comment`, "POST", { "id": postId, "comment": comment });
+
+    // Remove existing event listeners (if any)
+    const oldCommentButton = document.getElementById("comment-button");
+    const newCommentButton = oldCommentButton.cloneNode(true);
+    oldCommentButton.parentNode.replaceChild(newCommentButton, oldCommentButton);
+
+    newCommentButton.addEventListener("click", () => {
+        const inputComment = document.getElementById("comment-input").value;
+        if (inputComment) {
+            apiCall(`job/comment`, "POST", { "id": postId, "comment": inputComment });
             document.getElementById("comment-input").value = "";
         }
         // live update comment list
@@ -348,22 +352,14 @@ const popupCommentList = (comments, postId) => {
             while (commentList.firstChild) {
                 commentList.removeChild(commentList.firstChild);
             }
-            comments = data.find((item) => item.id === postId).comments;
-            popupCommentList(comments, postId);
+            const updatedComments = data.find((item) => item.id === postId).comments;
+            popupCommentList(updatedComments, postId);
         });
-    });
-
-    // User can press enter to submit comment
-    const commentInput = document.getElementById("comment-input");
-    commentInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault(); // Prevent the default action (newline)
-            document.getElementById("comment-button").click();
-        }
     });
 
     showPopup("comment-list-popup");
 };
+
 
 document.getElementById("comment-close-btn").addEventListener("click", () => {
     document.getElementById("comment-list-popup").style.display = "none";
