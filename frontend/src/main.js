@@ -138,7 +138,6 @@ document.getElementById("watch-button").addEventListener("click", () => {
         // Watchees
         populateWatchees(data);
     });
-
 });
 
 document.getElementById("watch-user-button").addEventListener("click", () => {

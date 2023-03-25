@@ -52,7 +52,7 @@ export const populatePostCards = (data, containerId) => {
             .then((creatorName) => {
                 const creatorText = createInfoTextElement("Posted by: " + creatorName, "card-text text-muted post-creator-text");
                 return creatorText;
-            });
+            })
 
         const createTimeText = createInfoTextElement("Post time: " + formatTime(item.createdAt), "card-text text-muted");
         extraInfo.appendChild(createTimeText);
@@ -93,11 +93,17 @@ export const populatePostCards = (data, containerId) => {
                     apiCall(`job/like`, "PUT", { "id": item.id, "turnon": false }).then(() => {
                         // live update like count and UI
                         populateFeed();
+                    })
+                    .catch(() => {
+                        showErrorPopup("No internet connection");
                     });
                 } else {
                     apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
                         // live update like count and UI
                         populateFeed();
+                    })
+                    .catch(() => {
+                        showErrorPopup("No internet connection");
                     });
                 }
             });
@@ -192,12 +198,24 @@ export const populatePostCards = (data, containerId) => {
 let lastFeedLengthHash = null;
 
 export const populateFeed = () => {
+    const containerId = "feed-items";
     apiCall("job/feed?start=0", "GET", {})
         .then((data) => {
-            const containerId = "feed-items";
+            localStorage.setItem("feed", JSON.stringify(data));
             populatePostCards(data, containerId);
             lastFeedLengthHash = jsonHash(data);
         })
+        .catch(() => {
+            // if is offline or there's an error from the API, use cached data
+            const cachedData = localStorage.getItem("feed");
+            if (cachedData) {
+                const containerId = "feed-items";
+                const data = JSON.parse(cachedData);
+                populatePostCards(data, containerId);
+            } else {
+                console.error("No cached data available");
+            }
+        });
 };
 
 // check if the server data base for /job/feed is updated by checking its hash value
@@ -230,7 +248,15 @@ const jsonHash = (data) => {
 const getCreatorUsername = (id) => {
     return apiCall(`user`, "GET", { userId: id })
         .then((data) => {
+            localStorage.setItem(`user_${id}`, JSON.stringify(data.name));
             return data.name;
+        })
+        .catch(() => { // offline
+            const cachedData = localStorage.getItem(`user_${id}`);
+            if (cachedData) {
+                return JSON.parse(cachedData);
+            }
+            return "Unknown";
         });
 };;
 
@@ -341,7 +367,11 @@ const popupCommentList = (comments, postId) => {
     newCommentButton.addEventListener("click", () => {
         const inputComment = document.getElementById("comment-input").value;
         if (inputComment) {
-            apiCall(`job/comment`, "POST", { "id": postId, "comment": inputComment });
+            apiCall(`job/comment`, "POST", { "id": postId, "comment": inputComment })
+                .catch(() => { // offline
+                    showErrorPopup("No internet connection.");
+                    return;
+                });
             document.getElementById("comment-input").value = "";
         }
         // live update comment list
