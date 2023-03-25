@@ -27,13 +27,13 @@ header .container {
     background-color: #21252a;
     width: 300px;
     height: 150px;
-	position: absolute;
-    top: 300px;
-	left: 50%;
-	transform: translate(-50%, -50%);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 9999;
     border-radius: 10px;
-    display: flex;
+    display: flex;    
 }
 
 /* Register CSS */

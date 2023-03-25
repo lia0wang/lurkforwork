@@ -1,6 +1,6 @@
 import { apiCall, show, hide, handleLogin, handleLoginUI, getUsernameById, handleLogout } from "./helpers.js";
 import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
-import { populateFeed, populatePostCards } from "./job.js";
+import { populateFeed, populatePostCards } from "./jobs.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 import "./dropZone.js";
 

@@ -1,4 +1,4 @@
-import { populatePostCards } from "./job.js";
+import { populatePostCards } from "./jobs.js";
 import { apiCall, getUsernameById, hide, show } from "./helpers.js";
 
 export const populateUserInfo = async (userId) => {
@@ -32,6 +32,7 @@ export const populateUserInfo = async (userId) => {
     const watchButton = document.getElementById("watch-button");
 
     if (userId == cachedUserID) {
+        show("edit-profile-button-container");
         hide("watch-button-container");
     } else {
         console.log(data.watcheeUserIds);
