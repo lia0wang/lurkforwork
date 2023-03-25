@@ -12,10 +12,38 @@
 }
 
 /* Header Section */
+header {
+    position: fixed;
+    top: 0;
+    z-index: 999;
+    width: 100%;
+}
+
 header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+@media screen and (max-width: 480px) {
+    #website-name {
+        display: none;
+    }
+    header .container {
+        flex-direction: column;
+        font-size: medium;
+    }
+    #watch-user-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+    #watch-user-button button {
+        margin: auto;
+        font-size: smaller;
+    }
 }
 
 #error-popup-container {
