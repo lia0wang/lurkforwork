@@ -172,11 +172,40 @@ export const populatePostCards = async (data, containerId) => {
     }
 };
 
+let lastFeedLengthHash = null;
+
 export const populateFeed = async () => {
     const data = await apiCall("job/feed?start=0", "GET", {});
     const containerId = "feed-items";
     populatePostCards(data, containerId);
+    lastFeedLengthHash = jsonHash(data);
 };
+
+// check if the server data base for /job/feed is updated by checking its hash value
+// if so call populateFeed
+export const pollFeed = async () => {
+    await apiCall("job/feed?start=0", "GET", {}).then((data) => {
+        // compare data with the last time we called populateFeed
+        if (jsonHash(data) !== lastFeedLengthHash) {
+            populateFeed();
+        }
+    });
+};
+
+// hash json data
+const jsonHash = (data) => {
+    const jsonString = JSON.stringify(data);
+    let hash = 0;
+    if (jsonString.length === 0) {
+      return hash;
+    }
+    for (let i = 0; i < jsonString.length; i++) {
+      const char = jsonString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
 
 const getCreatorUsername = async (id) => {
     const data = await apiCall(`user`, "GET", { userId: id });

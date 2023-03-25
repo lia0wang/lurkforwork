@@ -1,6 +1,6 @@
 import { BACKEND_PORT, POLLING_INTERVAL_TIME } from "./config.js";
 import { showErrorPopup } from "./auth.js";
-import { populateFeed } from "./job.js";
+import { populateFeed, pollFeed } from "./job.js";
 
 export let pollingInterval = null;
 
@@ -81,7 +81,7 @@ export const handleLoginUI = () => {
     show("watch-user-button")
     show("section-logged-in");
     // Polling for new posts, likes and comments every POLLING_INTERVAL_TIME seconds
-    pollingInterval = setInterval(populateFeed, POLLING_INTERVAL_TIME);
+    pollingInterval = setInterval(pollFeed, POLLING_INTERVAL_TIME);
 };
 
 export const handleLogout = () => {
