@@ -39,6 +39,7 @@ export const populateUserInfo = async (userId) => {
         // if the cachedUserId is not in the currentUser's watcheeUserIds, show "unwatch"
         watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch": "watch";
         show("watch-button-container");
+        hide("edit-profile-button-container");
     }
 
     return data;

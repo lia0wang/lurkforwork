@@ -1,4 +1,4 @@
-import { apiCall, show, hide, handleLogin, getUsernameById } from "./helpers.js";
+import { apiCall, show, hide, handleLogin } from "./helpers.js";
 import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
 import { populateFeed, populateItems } from "./feed.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
@@ -60,7 +60,6 @@ document.getElementById("nav-logout").addEventListener("click", () => {
     hide("nav-add-job");
     hide("page-profile");
     show("page-feed");
-    show("watch-user-button");
 });
 
 document.getElementById("nav-profile").addEventListener("click", async () => {
@@ -154,7 +153,42 @@ document.getElementById("watch-user-button").addEventListener("click", async () 
     };
     await apiCall("user/watch", "PUT", payload);
 });
-    
+
+const displayPage = () => {
+    const hash = window.location.hash;
+    if (hash === "#page-register") {
+        hide("page-login");
+        show("page-register");
+    } else if (hash === "#page-login") {
+        hide("page-register");
+        show("page-login");
+    } else if (hash === "#page-profile") {
+        hide("page-feed");
+        show("page-profile");
+        show("nav-feed");
+        hide("nav-profile");
+        hide("watch-user-button");
+    } else if (hash === "#page-feed") {
+        show("page-feed");
+        hide("page-profile");
+        show("nav-profile");
+        show("watch-user-button");
+        hide("nav-feed");
+    }
+};
+
+document.getElementById("nav-register").addEventListener("click", () => {
+    updateUrl("#page-register");
+});
+
+const updateUrl = (url) => {
+    console.log(url);
+    const fragment = url.split("#")[1];
+    history.pushState({}, "", `#${fragment}`);
+};
+
+window.addEventListener("hashchange", displayPage);
+window.addEventListener("load", displayPage);
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
