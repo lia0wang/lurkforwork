@@ -84,6 +84,27 @@ export const handleLoginUI = () => {
     pollingInterval = setInterval(populateFeed, POLLING_INTERVAL_TIME);
 };
 
+export const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    show("section-logged-out");
+    hide("section-logged-in");
+    show("nav-register");
+    show("nav-login");
+    hide("nav-logout");
+    hide("watch-user-button");
+    hide("nav-profile");
+    hide("nav-feed");
+    hide("nav-add-job");
+    hide("page-profile");
+    show("page-feed");
+    show("watch-user-button");
+    hide("watch-user-button")
+    // stop polling
+    clearInterval(pollingInterval);
+};
+
+
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
 
 export const apiCall = (path, method, body, headers = {}) => {

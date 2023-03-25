@@ -1,4 +1,4 @@
-import { apiCall, show, hide, handleLogin, handleLoginUI, getUsernameById, pollingInterval } from "./helpers.js";
+import { apiCall, show, hide, handleLogin, handleLoginUI, getUsernameById, handleLogout } from "./helpers.js";
 import { registerValidator, emailValidator, passwordValidator, nameValidator, getValuesInForm, showErrorPopup } from "./auth.js";
 import { populateFeed, populatePostCards } from "./job.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
@@ -47,22 +47,7 @@ document.getElementById("register-button").addEventListener("click", (event) => 
 });
 
 document.getElementById("nav-logout").addEventListener("click", () => {
-    show("section-logged-out");
-    hide("section-logged-in");
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    show("nav-register");
-    show("nav-login");
-    hide("nav-logout");
-    hide("watch-user-button");
-    hide("nav-profile");
-    hide("nav-feed");
-    hide("nav-add-job");
-    hide("page-profile");
-    show("page-feed");
-    show("watch-user-button");
-    // stop polling
-    clearInterval(pollingInterval);
+    handleLogout();
 });
 
 document.getElementById("nav-profile").addEventListener("click", async () => {
