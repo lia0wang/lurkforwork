@@ -190,6 +190,7 @@ const updateUrl = (url) => {
 
 window.addEventListener("hashchange", displayPage);
 window.addEventListener("load", displayPage);
+
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {
