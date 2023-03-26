@@ -1,8 +1,9 @@
 import { BACKEND_PORT, POLLING_INTERVAL_TIME } from "./config.js";
 import { showErrorPopup } from "./auth.js";
-import { populateFeed, pollFeed } from "./jobs.js";
+import { populateFeed, pollFeed, pollNotification } from "./jobs.js";
 
-export let pollingInterval = null;
+export let pollingFeed = null;
+export let pollingNotification = null;
 
 /**
  * Given a js file object representing a jpg or png image, such as one taken
@@ -82,7 +83,8 @@ export const handleLoginUI = () => {
     show("watch-user-button")
     show("section-logged-in");
     // Polling for new posts, likes and comments every POLLING_INTERVAL_TIME seconds
-    pollingInterval = setInterval(pollFeed, POLLING_INTERVAL_TIME);
+    pollingFeed = setInterval(pollFeed, POLLING_INTERVAL_TIME);
+    pollingNotification = setInterval(pollNotification, POLLING_INTERVAL_TIME);
 };
 
 export const handleLogout = () => {
@@ -103,7 +105,8 @@ export const handleLogout = () => {
     show("watch-user-button");
     hide("watch-user-button")
     // stop polling
-    clearInterval(pollingInterval);
+    clearInterval(pollingFeed);
+    clearInterval(pollingNotification);
 };
 
 
