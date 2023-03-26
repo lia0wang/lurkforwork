@@ -98,6 +98,7 @@ document.getElementById("edit-profile-button").addEventListener("click", () => {
 
     const image = prompt("Enter your new image URL:");
     userAvatar.style.backgroundImage = `url(${image})`;
+    userAvatar.setAttribute("alt", `${name}'s Avatar`);
 
     const payload = {
         email: email,

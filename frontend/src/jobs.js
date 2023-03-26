@@ -26,6 +26,7 @@ export const populatePostCards = (data, containerId) => {
         const img = document.createElement("img");
         img.src = item.image;
         img.className = "job-image";
+        img.alt = `Image of ${item.title}`;
         imgWrapper.appendChild(img);
 
         const colBody = document.createElement("div");

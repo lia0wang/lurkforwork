@@ -38,7 +38,6 @@
 }
 
 .job-image {
-    alt: "Job image";
     object-fit: contain;
     background-size: cover;
     object-position: center center; /* Updated */
