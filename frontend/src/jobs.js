@@ -200,6 +200,60 @@ export const populatePostCards = (data, containerId) => {
     return Promise.all(cardPromises);
 };
 
+
+const updateJob = () => {
+    const title = document.getElementById("job-title").value;
+    const startDate = document.getElementById("job-start-date").value;
+    const description = document.getElementById("job-description").value;
+    const imageFile = document.getElementById("job-image").files[0];
+
+    if (title && startDate && description && imageFile) {
+        return fileToDataUrl(imageFile)
+            .then((imageData) => {
+                const requestBody = {
+                    "title": title,
+                    "image": imageData,
+                    "start": startDate,
+                    "description": description
+                };
+
+                let response;
+                if (currentJobId === -1) { // create new job
+                    return apiCall("job", "POST", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                } else { // update existing job
+                    requestBody.id = currentJobId;
+                    return apiCall("job", "PUT", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                }
+            });
+    } else {
+        // Handle missing fields
+        showErrorPopup("Missing fields");
+        console.log("Missing fields");
+    }
+};
+
 let lastFeedLengthHash = null;
 
 export const populateFeed = () => {
@@ -490,4 +544,12 @@ document.getElementById("add-job-close-btn").addEventListener("click", () => {
     document.getElementById("job-start-date").value = "";
     document.getElementById("job-description").value = "";
     document.getElementById("job-image").value = "";
+});
+
+document.getElementById("nav-feed").addEventListener("click", () => {
+    show("page-feed");
+    hide("page-profile");
+    show("nav-profile");
+    show("watch-user-button");
+    hide("nav-feed");
 });
