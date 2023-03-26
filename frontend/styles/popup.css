@@ -1,4 +1,3 @@
-
 .popup {
     margin-top: 60px;
     display: none;
@@ -9,7 +8,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 #error-popup-container {
@@ -27,7 +26,7 @@
     transform: translate(-50%, -50%);
     z-index: 9999;
     border-radius: 10px;
-    display: flex;    
+    display: flex;
 }
 
 .popup-content {

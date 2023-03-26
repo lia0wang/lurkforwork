@@ -4,7 +4,6 @@ import { populateFeed, pollFeed } from "./jobs.js";
 
 export let pollingInterval = null;
 
-
 /**
  * Given a js file object representing a jpg or png image, such as one taken
  * from a html file input element, return a promise which resolves to the file
@@ -21,7 +20,7 @@ export let pollingInterval = null;
  * @return {Promise<string>} Promise which resolves to the file as a data url.
  */
 export function fileToDataUrl(file) {
-    const validFileTypes = [ 'image/jpeg', 'image/png', 'image/jpg' ]
+    const validFileTypes = ['image/jpeg', 'image/png', 'image/jpg']
     const valid = validFileTypes.find(type => type === file.type);
     // Bad data, let's walk away.
     if (!valid) {
@@ -29,7 +28,7 @@ export function fileToDataUrl(file) {
     }
 
     const reader = new FileReader();
-    const dataUrlPromise = new Promise((resolve,reject) => {
+    const dataUrlPromise = new Promise((resolve, reject) => {
         reader.onerror = reject;
         reader.onload = () => resolve(reader.result);
     });
@@ -121,7 +120,7 @@ export const apiCall = (path, method, body, headers = {}) => {
         },
     };
 
-    if (method === "GET" && body ) {
+    if (method === "GET" && body) {
         // Convert body object to query string for GET requests
         const queryString = new URLSearchParams(body).toString();
         if (queryString)
