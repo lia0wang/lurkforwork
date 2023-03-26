@@ -40,8 +40,6 @@ export const populateUserInfo = (userId) => {
                 show("edit-profile-button-container");
                 hide("watch-button-container");
             } else {
-                console.log(data.watcheeUserIds);
-                console.log(cachedUserID);
                 // if the cachedUserId is not in the currentUser's watcheeUserIds, show "unwatch"
                 watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch" : "watch";
                 show("watch-button-container");
@@ -177,7 +175,6 @@ document.getElementById("edit-profile-button").addEventListener("click", () => {
 document.getElementById("watch-button").addEventListener("click", () => {
     const currentUserId = document.getElementById("user-id").textContent.slice(1); // #10648 -> 10648
     const turnon = (document.getElementById("watch-button").textContent === "watch") ? true : false;
-    console.log(currentUserId, turnon);
 
     const payload = {
         id: currentUserId,
