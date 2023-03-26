@@ -27,8 +27,8 @@ export const populateFeed = () => {
         .then((data) => {
             localStorage.setItem("feed", JSON.stringify(data));
             currentPage = 0; // reset page number
-            document.getElementById(containerId).textContent = "";
             lastFeedContentHash = jsonHash(data);
+            document.getElementById(containerId).textContent = "";
             populatePostCards(data, containerId)
                 .then(() => {
                     // keep the scroll position after populating the feed
@@ -46,6 +46,7 @@ export const populateFeed = () => {
             if (cachedData) {
                 const containerId = "feed-items";
                 const data = JSON.parse(cachedData);
+                document.getElementById(containerId).textContent = "";
                 populatePostCards(data, containerId);
             } else {
                 console.error("No cached data available");
@@ -199,6 +200,7 @@ export const populatePostCards = (data, containerId) => {
                 const currentUserId = localStorage.getItem("userId");
                 populateUserInfo(currentUserId)
                     .then((newUserData) => {
+                        document.getElementById(containerId).textContent = "";
                         populatePostCards(newUserData.jobs, "user-jobs");
                     });
             });
@@ -216,6 +218,7 @@ export const populatePostCards = (data, containerId) => {
                         return populateUserInfo(currentUserId);
                     })
                     .then((newUserData) => {
+                        document.getElementById(containerId).textContent = "";
                         populatePostCards(newUserData.jobs, "user-jobs");
                     })
             });
@@ -233,6 +236,7 @@ export const populatePostCards = (data, containerId) => {
 
                     populateUserInfo(item.creatorId)
                         .then((data) => {
+                            document.getElementById(containerId).textContent = "";
                             populatePostCards(data.jobs, "user-jobs");
                             populateWatchees(data);
                         });
@@ -392,6 +396,7 @@ const popupCommentList = (comments, postId) => {
 
             populateUserInfo(comment.userId)
                 .then((data) => {
+                    document.getElementById(containerId).textContent = "";
                     populatePostCards(data.jobs, "user-jobs");
                     populateWatchees(data);
                 });
@@ -464,7 +469,7 @@ document.getElementById("add-job-submit").addEventListener("click", () => {
         const currentUserId = localStorage.getItem("userId");
         populateUserInfo(currentUserId)
             .then((newUserData) => {
-                populatePostCards(newUserData.jobs, "user-jobs");
+                populateFeed(newUserData.jobs, "user-jobs");
                 populateWatchees(newUserData);
             });
 

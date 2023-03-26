@@ -103,6 +103,7 @@ export const populateWatchees = (data) => {
             // Populate the profile page with the watchee's info
             populateUserInfo(watcheeId)
                 .then((data) => {
+                    document.getElementById(containerId).textContent = "";
                     populatePostCards(data.jobs, "user-jobs");
                     populateWatchees(data);
                 });
@@ -126,6 +127,7 @@ document.getElementById("nav-profile").addEventListener("click", () => {
             // Jobs
             const jobs = data.jobs;
             const containerId = "user-jobs";
+            document.getElementById(containerId).textContent = "";
             populatePostCards(jobs, containerId);
 
             // Watchees
@@ -187,6 +189,7 @@ document.getElementById("watch-button").addEventListener("click", () => {
             // Jobs
             const jobs = data.jobs;
             const containerId = "user-jobs";
+            document.getElementById(containerId).textContent = "";
             populatePostCards(jobs, containerId);
 
             // Watchees

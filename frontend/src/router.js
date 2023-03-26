@@ -36,6 +36,7 @@ export const locationHandler = () => {
                 // Jobs
                 const jobs = data.jobs;
                 const containerId = "user-jobs";
+                document.getElementById(containerId).textContent = "";
                 populatePostCards(jobs, containerId);
 
                 // Watchees
