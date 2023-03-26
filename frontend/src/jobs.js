@@ -533,6 +533,7 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     show("page-feed");
     hide("page-profile");
     show("nav-profile");
+    populateFeed();
     show("watch-user-button");
     hide("nav-feed");
 });
