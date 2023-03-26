@@ -2,7 +2,6 @@ import { hide, show } from "./helpers.js";
 import { populatePostCards } from "./jobs.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
-
 const routes = {
     "": "",
     "login": "page-login",

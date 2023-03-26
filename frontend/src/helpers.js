@@ -112,12 +112,9 @@ export const handleLogout = () => {
     clearInterval(pollingNotification);
 };
 
-
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
 
 export const apiCall = (path, method, body, headers = {}) => {
-    // console.log("API call:", path, method, body);
-
     const options = {
         method: method,
         headers: {
