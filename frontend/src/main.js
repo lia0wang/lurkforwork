@@ -1,5 +1,6 @@
-import { apiCall, show, hide, handleLoginUI } from "./helpers.js";
-import { populateFeed, populatePostCards } from "./jobs.js";
+import { show, hide, handleLoginUI } from "./helpers.js";
+import { populateFeed } from "./jobs.js";
+import "./dropZone.js";
 
 // Fragment
 const displayPage = () => {

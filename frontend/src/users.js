@@ -1,7 +1,6 @@
 import { apiCall, show, hide } from "./helpers.js";
 import { emailValidator, passwordValidator, nameValidator, showErrorPopup } from "./auth.js";
 import { populatePostCards } from "./jobs.js";
-import "./dropZone.js";
 
 //////////////////////////////////////////////////////// POPULATE USER PROFILE //////////////////////////////////////////////////////////
 

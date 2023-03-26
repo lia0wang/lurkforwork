@@ -135,7 +135,7 @@ export const populatePostCards = (data, containerId) => {
         }
 
         // update and delete buttons
-        if (containerId === "user-jobs") {
+        if (containerId === "user-jobs" && item.creatorId == localStorage.getItem("userId")) {
             const updateButton = document.createElement("button");
             updateButton.className = "btn btn-outline-primary btn-sm me-2 like-button";
             actionsRow.appendChild(updateButton);
@@ -156,7 +156,7 @@ export const populatePostCards = (data, containerId) => {
                         populatePostCards(newUserData.jobs, "user-jobs");
                     });
             });
-
+        
             const deleteButton = document.createElement("button");
             deleteButton.className = "btn btn-outline-danger btn-sm";
             actionsRow.appendChild(deleteButton);
@@ -173,7 +173,6 @@ export const populatePostCards = (data, containerId) => {
                         populatePostCards(newUserData.jobs, "user-jobs");
                     })
             });
-
         }
 
         return creatorTextPromise.then((creatorText) => {
