@@ -3,6 +3,56 @@ import { showErrorPopup } from "./auth.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
 let currentJobId = null;
+let lastFeedContentHash = null;
+let lastNumFeedItems = null;
+let currentPage = 0;
+const itemsPerPage = 5;
+
+//////////////////////////////////////////////////////// POPULATE JOB FEED //////////////////////////////////////////////////////////
+
+// avoid concurrent calls to populateFeed
+let populateFeedLock = false;
+export const populateFeed = () => {
+    if (populateFeedLock) {
+        // Return immediately if the function is already running
+        return;
+    }
+    populateFeedLock = true;
+    const scrollPosition = {
+        x: window.pageXOffset || document.documentElement.scrollLeft,
+        y: window.pageYOffset || document.documentElement.scrollTop,
+    };
+    const containerId = "feed-items";
+    apiCall("job/feed?start=0", "GET", {})
+        .then((data) => {
+            localStorage.setItem("feed", JSON.stringify(data));
+            currentPage = 0; // reset page number
+            document.getElementById(containerId).textContent = "";
+            lastFeedContentHash = jsonHash(data);
+            populatePostCards(data, containerId)
+                .then(() => {
+                    // keep the scroll position after populating the feed
+                    window.scrollTo({
+                        top: scrollPosition.y,
+                        left: scrollPosition.x,
+                        behavior: 'instant'
+                    });
+                });
+            populateFeedLock = false;
+        })
+        .catch(() => {
+            // if is offline or there's an error from the API, use cached data
+            const cachedData = localStorage.getItem("feed");
+            if (cachedData) {
+                const containerId = "feed-items";
+                const data = JSON.parse(cachedData);
+                populatePostCards(data, containerId);
+            } else {
+                console.error("No cached data available");
+            }
+            populateFeedLock = false;
+        });
+};
 
 export const populatePostCards = (data, containerId) => {
     const cardPromises = data.map((item) => {
@@ -248,136 +298,6 @@ const updateJob = () => {
     }
 };
 
-let lastFeedLengthHash = null;
-
-export const populateFeed = () => {
-    const scrollPosition = {
-        x: window.pageXOffset || document.documentElement.scrollLeft,
-        y: window.pageYOffset || document.documentElement.scrollTop,
-    };
-    const containerId = "feed-items";
-    apiCall("job/feed?start=0", "GET", {})
-        .then((data) => {
-            localStorage.setItem("feed", JSON.stringify(data));
-            currentPage = 0; // reset page number
-            document.getElementById(containerId).textContent = "";
-            lastFeedLengthHash = jsonHash(data);
-            populatePostCards(data, containerId)
-                .then(() => {
-                    // keep the scroll position after populating the feed
-                    window.scrollTo({
-                        top: scrollPosition.y,
-                        left: scrollPosition.x,
-                        behavior: 'instant'
-                    });
-                });
-        })
-        .catch(() => {
-            // if is offline or there's an error from the API, use cached data
-            const cachedData = localStorage.getItem("feed");
-            if (cachedData) {
-                const containerId = "feed-items";
-                const data = JSON.parse(cachedData);
-                populatePostCards(data, containerId);
-            } else {
-                console.error("No cached data available");
-            }
-        });
-};
-
-// check if the server data base for /job/feed is updated by checking its hash value
-// if so call populateFeed
-export const pollFeed = () => {
-    apiCall("job/feed?start=0", "GET", {})
-        .then((data) => {
-            // compare the hash value data with the last time we called populateFeed
-            if (jsonHash(data) !== lastFeedLengthHash) {
-                populateFeed();
-            }
-        })
-};
-
-let lastNumFeedItems = null;
-
-const getNumFeedItems = () => {
-    return new Promise((resolve, reject) => {
-        try {
-          let numFeedItems = 0;
-          const fetchJobData = (startIdx) => {
-            return apiCall(`job/feed?start=${startIdx}`, "GET", {}).then((jobData) => {
-                  if (jobData && jobData.length > 0) {
-                        numFeedItems += jobData.length;
-                        return fetchJobData(startIdx + 5);
-                  } else {
-                        return numFeedItems;
-                  }
-              });
-          };
-
-          fetchJobData(0)
-              .then((numFeedItems) => {
-                    if (lastNumFeedItems === null) {
-                        lastNumFeedItems = numFeedItems;
-                    }
-                    resolve(numFeedItems);
-              })
-              .catch((error) => {
-                  reject(error);
-              });
-        } catch (error) {
-              console.error("Error fetching job data:", error);
-              reject(error);
-        }
-      });
-};
-
-
-// check if a user is watching posted a new job
-export const pollNotification = () => {
-    getNumFeedItems()
-    .then ((numFeedItems) => {
-            if (lastNumFeedItems && (numFeedItems !== lastNumFeedItems)) {
-                if (lastNumFeedItems < numFeedItems) { // new job posted
-                    // use notification API to show a notification
-                    const showNotification = () => {
-                        const notification = new Notification("New Job Posted from Lurkforwork!" , {
-                            body: "A user you are watching has posted a new job",
-                        });
-                        notification.onclick = () => {
-                            window.focus();
-                        }
-                    };
-                    if (Notification.permission !== 'granted') {
-                        Notification.requestPermission().then(permission => {
-                            if (permission === 'granted') {
-                                showNotification();
-                            }
-                        });
-                    } else {
-                        showNotification();
-                    }
-                }
-                // update lastNumFeedItems
-                lastNumFeedItems = numFeedItems;
-            }
-        });
-}
-
-// hash json data
-const jsonHash = (data) => {
-    const jsonString = JSON.stringify(data);
-    let hash = 0;
-    if (jsonString.length === 0) {
-        return hash;
-    }
-    for (let i = 0; i < jsonString.length; i++) {
-        const char = jsonString.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
-}
-
 const getCreatorUsername = (id) => {
     return apiCall(`user`, "GET", { userId: id })
         .then((data) => {
@@ -480,7 +400,6 @@ const popupCommentList = (comments, postId) => {
         commentList.appendChild(listItem);
     });
 
-
     // Remove existing event listeners (if any)
     const oldCommentButton = document.getElementById("comment-button");
     const newCommentButton = oldCommentButton.cloneNode(true);
@@ -574,9 +493,7 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     hide("nav-feed");
 });
 
-// Infinite scroll
-const itemsPerPage = 5;
-let currentPage = 0;
+////////////////////////////////////////////////////// INFINITE SCROLLING //////////////////////////////////////////////////////////
 
 window.addEventListener("scroll", () => {
     // Avoid error popups showing up when switching pages
@@ -602,3 +519,96 @@ window.addEventListener("scroll", () => {
             })
     }
 });
+
+//////////////////////////////////////////////////////// POLLING //////////////////////////////////////////////////////////
+
+// check if the server data base for /job/feed is updated by checking its hash value
+// if so call populateFeed
+export const pollFeed = () => {
+    apiCall("job/feed?start=0", "GET", {})
+        .then((data) => {
+            // compare the hash value data with the last time we called populateFeed
+            if (jsonHash(data) !== lastFeedContentHash) {
+                populateFeed();
+            }
+        })
+};
+
+const getNumFeedItems = () => {
+    return new Promise((resolve, reject) => {
+        try {
+          let numFeedItems = 0;
+          const fetchJobData = (startIdx) => {
+            return apiCall(`job/feed?start=${startIdx}`, "GET", {}).then((jobData) => {
+                  if (jobData && jobData.length > 0) {
+                        numFeedItems += jobData.length;
+                        return fetchJobData(startIdx + 5);
+                  } else {
+                        return numFeedItems;
+                  }
+              });
+          };
+
+          fetchJobData(0)
+              .then((numFeedItems) => {
+                    if (lastNumFeedItems === null) {
+                        lastNumFeedItems = numFeedItems;
+                    }
+                    resolve(numFeedItems);
+              })
+              .catch((error) => {
+                  reject(error);
+              });
+        } catch (error) {
+              console.error("Error fetching job data:", error);
+              reject(error);
+        }
+      });
+};
+
+
+// check if a user is watching posted a new job
+export const pollNotification = () => {
+    getNumFeedItems()
+    .then ((numFeedItems) => {
+            if (lastNumFeedItems && (numFeedItems !== lastNumFeedItems)) {
+                if (lastNumFeedItems < numFeedItems) { // new job posted
+                    // use notification API to show a notification
+                    const showNotification = () => {
+                        const notification = new Notification("New Job Posted from Lurkforwork!" , {
+                            body: "A user you are watching has posted a new job",
+                        });
+                        notification.onclick = () => {
+                            window.focus();
+                        }
+                    };
+                    if (Notification.permission !== 'granted') {
+                        Notification.requestPermission().then(permission => {
+                            if (permission === 'granted') {
+                                showNotification();
+                            }
+                        });
+                    } else {
+                        showNotification();
+                    }
+                }
+                // update lastNumFeedItems
+                lastNumFeedItems = numFeedItems;
+            }
+        });
+}
+
+// hash json data
+const jsonHash = (data) => {
+    const jsonString = JSON.stringify(data);
+    let hash = 0;
+    if (jsonString.length === 0) {
+        return hash;
+    }
+    for (let i = 0; i < jsonString.length; i++) {
+        const char = jsonString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
