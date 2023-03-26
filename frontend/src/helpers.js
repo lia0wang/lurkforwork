@@ -45,20 +45,32 @@ export function fileToDataUrl(file) {
 
 ////////////////////////////////////////////////////// TOKEN ////////////////////////////////////////////////////////
 
-export const setToken = (token) => {
+/**
+ * Sets the authentication token in local storage and updates the UI. *  * @param {string} token - The authentication token to be saved.
+ * @returns {void}
+ */
+ export const setToken = (token) => {
     localStorage.setItem("token", token);
     show("section-logged-in");
     hide("section-logged-out");
     populateFeed();
 };
 
-export const setUserId = (userId) => {
+/**
+ * Sets the current user's ID in local storage. *  * @param {string} userId - The ID of the current user.
+ * @returns {void}
+ */
+ export const setUserId = (userId) => {
     localStorage.setItem("userId", userId);
 };
 
 //////////////////////////////////////////////////////// DOM HELPERS ////////////////////////////////////////////////////////
 
-export const getUsernameById = (id) => {
+/**
+ * Gets the username associated with the specified user ID. *  * @param {string} id - The ID of the user.
+ * @returns {Promise<string>} - A Promise that resolves to the user's name.
+ */
+ export const getUsernameById = (id) => {
     return apiCall(`user`, "GET", { userId: id })
         .then((data) => {
             return data.name;
@@ -68,20 +80,39 @@ export const getUsernameById = (id) => {
         });
 };
 
+/**
+ * Shows the specified element by removing the "hide" CSS class from it.
+ * @param {string} element - The ID of the element to be shown.
+ * @returns {void}
+ */
 export const show = (element) => {
     document.getElementById(element).classList.remove("hide");
 };
 
+/**
+ * Hides the specified element by adding the "hide" CSS class to it.
+ * @param {string} element - The ID of the element to be hidden.
+ * @returns {void}
+ */
 export const hide = (element) => {
     document.getElementById(element).classList.add("hide");
 };
 
+/**
+ * Handles a successful login by setting the authentication token and user ID, and updating the UI.
+ * @param {Object} data - An object containing the authentication token and user ID.
+ * @returns {void}
+ */
 export const handleLogin = (data) => {
     setToken(data.token);
     setUserId(data.userId)
     handleLoginUI();
 };
 
+/**
+ * Updates the UI to reflect a successful login.
+ * @returns {void}
+ */
 export const handleLoginUI = () => {
     hide("section-logged-out");
     hide("nav-register");
@@ -96,6 +127,10 @@ export const handleLoginUI = () => {
     pollingNotification = setInterval(pollNotification, POLLING_INTERVAL_TIME);
 };
 
+/**
+ * Updates the UI to reflect a successful logout.
+ * @returns {void}
+ */
 export const handleLogout = () => {
     document.getElementById("feed-items").textContent = "";
     localStorage.removeItem("token");
@@ -120,6 +155,14 @@ export const handleLogout = () => {
 
 //////////////////////////////////////////////////////// API CALLS ////////////////////////////////////////////////////////
 
+/**
+ * Makes an HTTP request to the backend API.
+ * @param {string} path - The API endpoint to send the request to.
+ * @param {string} method - The HTTP method to use for the request (e.g. "GET", "POST").
+ * @param {Object} [body] - The request body as an object (for "POST" and "PUT" requests).
+ * @param {Object} [headers] - Custom headers to include in the request.
+ * @returns {Promise} - A promise that resolves to the response data (as a JavaScript object).
+ */
 export const apiCall = (path, method, body, headers = {}) => {
     const options = {
         method: method,

@@ -8,7 +8,13 @@ import { apiCall, show, hide } from "./helpers.js";
 import { emailValidator, passwordValidator, nameValidator, showErrorPopup } from "./auth.js";
 import { populateFeed, populatePostCards } from "./jobs.js";
 
-//////////////////////////////////////////////////////// POPULATE USER PROFILE ////////////////////////////////////////////
+//////////////////////////////////////////////////////// POPULATE USER PROFILE //////////////////////////////////////////////////////////
+
+/** 
+ * Populates user information on the profile page.
+ * @param {number} userId - The ID of the user whose information is being displayed.
+ * @returns {Promise<Object>} A Promise that resolves with the user's information.
+ */
 export const populateUserInfo = (userId) => {
     const payload = {
         userId: userId,
@@ -54,6 +60,11 @@ export const populateUserInfo = (userId) => {
         });
 };
 
+/** 
+ * Populates the watchees section on the profile page with the user's watchees and their info.
+ * @param {Object} data - The user's data returned from the API.
+ * @returns {void}
+ */
 export const populateWatchees = (data) => {
     const watchees = data.watcheeUserIds;
     const numWatchees = watchees.length;

@@ -5,6 +5,8 @@
 
 const dropZone = document.getElementById("drop-zone");
 
+//////////////////////////////////////////////////////// DROP ZONE MAIN //////////////////////////////////////////////////////////
+
 dropZone.addEventListener("dragover", (event) => {
     event.preventDefault();
     event.stopPropagation();

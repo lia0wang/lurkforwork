@@ -7,6 +7,7 @@ import { hide, show } from "./helpers.js";
 import { populatePostCards } from "./jobs.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
+// Containing the mapping of routes to page IDs
 const routes = {
     "": "",
     "login": "page-login",
@@ -14,6 +15,10 @@ const routes = {
     "feed": "page-feed",
 };
 
+/**
+ * Handles changes in the URL hash and navigates to the corresponding page
+ * @returns {void}
+ */
 export const locationHandler = () => {
     let path = window.location.hash.replace("#", ""); // login
 
@@ -70,6 +75,7 @@ export const locationHandler = () => {
     }
 }
 
+// Add event listeners for hashchange and page load
 window.addEventListener("hashchange", locationHandler);
 window.addEventListener("load", locationHandler);
 locationHandler();

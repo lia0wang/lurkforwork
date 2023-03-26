@@ -18,7 +18,12 @@ const itemsPerPage = 5;
 
 //////////////////////////////////////////////////////// POPULATE JOB FEED //////////////////////////////////////////////////////////
 
-let populateFeedLock = false;
+let populateFeedLock = false; // avoid concurrent calls to populateFeed
+
+/** 
+ * Populates the feed with job posts by calling API OR using cached data (Offline OR API error occurs).
+ * @returns {void}
+ */
 export const populateFeed = () => {
     if (populateFeedLock) {
         // Return immediately if the function is already running
@@ -62,6 +67,12 @@ export const populateFeed = () => {
         });
 };
 
+/**
+ * Populates the container with cards, where each card represents a job.
+ * @param {Array} data - An array of job objects.
+ * @param {string} containerId - The ID of the HTML container
+ * @returns {void}
+ */
 export const populatePostCards = (data, containerId) => {
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
@@ -249,6 +260,10 @@ export const populatePostCards = (data, containerId) => {
     return Promise.all(cardPromises);
 };
 
+/**
+ * Update a job in the system with the information provided by the user.
+ * @returns {Promise} A Promise that resolves when the job has been updated.
+ */
 const updateJob = () => {
     const title = document.getElementById("job-title").value;
     const startDate = document.getElementById("job-start-date").value;
@@ -314,6 +329,11 @@ const updateJob = () => {
     }
 };
 
+/**
+ * Fetches the username of the user who created a post from the API or the cache.
+ * @param {string} id - The ID of the user.
+ * @returns {Promise<string>} - A promise that resolves with the username of the user who created the post.
+ */
 const getCreatorUsername = (id) => {
     return apiCall(`user`, "GET", { userId: id })
         .then((data) => {
@@ -329,6 +349,11 @@ const getCreatorUsername = (id) => {
         });
 };;
 
+/**
+ * Formats the given timestamp as a human-readable string representing the time elapsed since it occurred.
+ * @param {string} createAt - The timestamp to format in string format.
+ * @returns {string} - A human-readable string representing the time elapsed since the given timestamp.
+ */
 const formatTime = (createAt) => {
     const now = new Date();
     const createdDate = new Date(createAt);
@@ -348,6 +373,12 @@ const formatTime = (createAt) => {
     }
 };
 
+/**
+ * Creates a new p element with the given text and class name.
+ * @param {string} text - The text to be displayed in the p element.
+ * @param {string} className - The class name to be added to the p element.
+ * @returns {HTMLElement} - The newly created p element.
+ */
 const createInfoTextElement = (text, className) => {
     const paragraph = document.createElement("p");
     paragraph.className = className;
@@ -355,6 +386,11 @@ const createInfoTextElement = (text, className) => {
     return paragraph;
 };
 
+/**
+ * Toggles the appearance of a like button based on whether it has been liked or not.
+ * @param {HTMLButtonElement} button - The button to toggle.
+ * @param {boolean} liked - Whether the button has been liked or not.
+ */
 const toggleLikeButton = (button, liked) => {
     if (liked) {
         button.classList.remove('btn-outline-primary');
@@ -365,10 +401,20 @@ const toggleLikeButton = (button, liked) => {
     }
 };
 
+/**
+ * Shows a popup by setting its display style to "block"
+ * @param {string} id - The id of the popup element to be shown
+ */
 const showPopup = (id) => {
     document.getElementById(id).style.display = "block";
 };
 
+/**
+ * Populates a popup with a list of usernames who liked a post and adds click event to each list item
+ * to navigate to the user's profile page.
+ * @param {string[]} likedBy - An array of user IDs who liked the post.
+ * @returns {void}
+ */
 const popupLikeList = (likedBy) => {
     const likeList = document.getElementById("like-list");
 
@@ -409,6 +455,15 @@ const popupLikeList = (likedBy) => {
     showPopup("like-list-popup");
 };
 
+/**
+ * Popup the comment list with given comments and post ID.
+ * @param {Object[]} comments - An array of comment objects.
+ * @param {string} comments[].userName - The username of the comment author.
+ * @param {string} comments[].comment - The text content of the comment.
+ * @param {string} comments[].userId - The ID of the comment author.
+ * @param {string} postId - The ID of the post.
+ * @returns {void}
+ */
 const popupCommentList = (comments, postId) => {
     const commentList = document.getElementById("comment-list");
 
@@ -567,8 +622,9 @@ window.addEventListener("scroll", () => {
 
 //////////////////////////////////////////////////////// POLLING //////////////////////////////////////////////////////////
 
-// check if the server data base for /job/feed is updated by checking its hash value
-// if so call populateFeed
+/**
+ * Polls the job feed for new content and calls populateFeed if there is new content.
+ */
 export const pollFeed = () => {
     apiCall("job/feed?start=0", "GET", {})
         .then((data) => {
@@ -579,6 +635,10 @@ export const pollFeed = () => {
         })
 };
 
+/**
+ * Retrieves the number of job items in the feed.
+ * @returns {Promise<number>} A Promise that resolves with the number of job items in the feed.
+ */
 const getNumFeedItems = () => {
     return new Promise((resolve, reject) => {
         try {
@@ -612,7 +672,12 @@ const getNumFeedItems = () => {
 };
 
 
-// check if a user is watching posted a new job
+/**
+ * Polls the feed to check for new job postings and shows a desktop notification if a new job is posted
+ * by a user that the current user is watching.
+ *
+ * @returns {void}
+ */
 export const pollNotification = () => {
     getNumFeedItems()
     .then ((numFeedItems) => {
@@ -643,7 +708,11 @@ export const pollNotification = () => {
         });
 }
 
-// hash json data
+/**
+ * Calculates a hash value for a given JSON data.
+ * @param {Object} data - The JSON data to be hashed.
+ * @returns {number} - The hash value for the given JSON data.
+ */
 const jsonHash = (data) => {
     const jsonString = JSON.stringify(data);
     let hash = 0;
