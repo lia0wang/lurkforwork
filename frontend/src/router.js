@@ -29,7 +29,7 @@ export const locationHandler = () => {
         hide("watch-user-button");
         show("page-profile");
         show("nav-feed");
-    
+
         // User info
         populateUserInfo(userId)
             .then((data) => {
@@ -37,7 +37,7 @@ export const locationHandler = () => {
                 const jobs = data.jobs;
                 const containerId = "user-jobs";
                 populatePostCards(jobs, containerId);
-    
+
                 // Watchees
                 populateWatchees(data);
             });
