@@ -5,10 +5,6 @@ import { populateUserInfo, populateWatchees } from "./users.js";
 let currentJobId = null;
 
 export const populatePostCards = (data, containerId) => {
-    // if (document.getElementById("page-feed").classList.contains("hide")) {
-    // }
-    document.getElementById(containerId).textContent = "";
-
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
@@ -99,17 +95,17 @@ export const populatePostCards = (data, containerId) => {
                         // live update like count and UI
                         populateFeed();
                     })
-                        .catch(() => {
-                            showErrorPopup("No internet connection");
-                        });
+                    .catch(() => {
+                        showErrorPopup("No internet connection");
+                    });
                 } else {
                     apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
                         // live update like count and UI
                         populateFeed();
                     })
-                        .catch(() => {
-                            showErrorPopup("No internet connection");
-                        });
+                    .catch(() => {
+                        showErrorPopup("No internet connection");
+                    });
                 }
             });
 
@@ -199,7 +195,6 @@ export const populatePostCards = (data, containerId) => {
     return Promise.all(cardPromises);
 };
 
-
 const updateJob = () => {
     const title = document.getElementById("job-title").value;
     const startDate = document.getElementById("job-start-date").value;
@@ -227,7 +222,7 @@ const updateJob = () => {
                         } else {
                             // Handle error
                             showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
+                            console.error(`Error: ${response.error}`);
                         }
                     });
                 } else { // update existing job
@@ -241,7 +236,7 @@ const updateJob = () => {
                         } else {
                             // Handle error
                             showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
+                            console.error(`Error: ${response.error}`);
                         }
                     });
                 }
@@ -249,19 +244,33 @@ const updateJob = () => {
     } else {
         // Handle missing fields
         showErrorPopup("Missing fields");
-        console.log("Missing fields");
+        console.error("Missing fields");
     }
 };
 
 let lastFeedLengthHash = null;
 
 export const populateFeed = () => {
+    const scrollPosition = {
+        x: window.pageXOffset || document.documentElement.scrollLeft,
+        y: window.pageYOffset || document.documentElement.scrollTop,
+    };
     const containerId = "feed-items";
     apiCall("job/feed?start=0", "GET", {})
         .then((data) => {
             localStorage.setItem("feed", JSON.stringify(data));
-            populatePostCards(data, containerId);
+            currentPage = 0; // reset page number
+            document.getElementById(containerId).textContent = "";
             lastFeedLengthHash = jsonHash(data);
+            populatePostCards(data, containerId)
+                .then(() => {
+                    // keep the scroll position after populating the feed
+                    window.scrollTo({
+                        top: scrollPosition.y,
+                        left: scrollPosition.x,
+                        behavior: 'instant'
+                    });
+                });
         })
         .catch(() => {
             // if is offline or there's an error from the API, use cached data
@@ -288,65 +297,68 @@ export const pollFeed = () => {
         })
 };
 
-let allJobsPostHash = null;
+let lastNumFeedItems = null;
 
-const getAllJobData = () => {
+const getNumFeedItems = () => {
     return new Promise((resolve, reject) => {
-      try {
-        let allJobData = [];
-        const fetchJobData = (startIdx) => {
-          return apiCall(`job/feed?start=${startIdx}`, "GET", {}).then((jobData) => {
-                if (jobData && jobData.length > 0) {
-                    allJobData.push(...jobData);
-                    return fetchJobData(startIdx + 5);
-                } else {
-                    return allJobData;
-                }
-            });
-        };
+        try {
+          let numFeedItems = 0;
+          const fetchJobData = (startIdx) => {
+            return apiCall(`job/feed?start=${startIdx}`, "GET", {}).then((jobData) => {
+                  if (jobData && jobData.length > 0) {
+                        numFeedItems += jobData.length;
+                        return fetchJobData(startIdx + 5);
+                  } else {
+                        return numFeedItems;
+                  }
+              });
+          };
 
-        fetchJobData(0)
-            .then((allJobData) => {
-                if (allJobsPostHash === null) {
-                    allJobsPostHash = jsonHash(allJobData);
-                }
-                resolve(allJobData);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-      } catch (error) {
-            console.error("Error fetching job data:", error);
-            reject(error);
-      }
-    });
-  };
+          fetchJobData(0)
+              .then((numFeedItems) => {
+                    if (lastNumFeedItems === null) {
+                        lastNumFeedItems = numFeedItems;
+                    }
+                    resolve(numFeedItems);
+              })
+              .catch((error) => {
+                  reject(error);
+              });
+        } catch (error) {
+              console.error("Error fetching job data:", error);
+              reject(error);
+        }
+      });
+};
+
 
 // check if a user is watching posted a new job
 export const pollNotification = () => {
-    getAllJobData()
-    .then ((allJobData) => {
-            console.log(allJobsPostHash);
-            if (jsonHash(allJobData) !== allJobsPostHash) {
-                allJobsPostHash = jsonHash(allJobData);
-                // use notification API to show a notification
-                const showNotification = () => {
-                    const notification = new Notification("New Job Posted from Lurkforwork!" , {
-                        body: "A user you are watching has posted a new job",
-                    });
-                    notification.onclick = () => {
-                        window.focus();
-                    }
-                };
-                if (Notification.permission !== 'granted') {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            showNotification();
+    getNumFeedItems()
+    .then ((numFeedItems) => {
+            if (lastNumFeedItems && (numFeedItems !== lastNumFeedItems)) {
+                if (lastNumFeedItems < numFeedItems) { // new job posted
+                    // use notification API to show a notification
+                    const showNotification = () => {
+                        const notification = new Notification("New Job Posted from Lurkforwork!" , {
+                            body: "A user you are watching has posted a new job",
+                        });
+                        notification.onclick = () => {
+                            window.focus();
                         }
-                    });
-                } else {
-                    showNotification();
+                    };
+                    if (Notification.permission !== 'granted') {
+                        Notification.requestPermission().then(permission => {
+                            if (permission === 'granted') {
+                                showNotification();
+                            }
+                        });
+                    } else {
+                        showNotification();
+                    }
                 }
+                // update lastNumFeedItems
+                lastNumFeedItems = numFeedItems;
             }
         });
 }
@@ -458,7 +470,6 @@ const popupCommentList = (comments, postId) => {
                 commentList.removeChild(commentList.firstChild);
             }
 
-            console.log("creator clicked");
             populateUserInfo(comment.userId)
                 .then((data) => {
                     populatePostCards(data.jobs, "user-jobs");
@@ -561,4 +572,33 @@ document.getElementById("nav-feed").addEventListener("click", () => {
     show("nav-profile");
     show("watch-user-button");
     hide("nav-feed");
+});
+
+// Infinite scroll
+const itemsPerPage = 5;
+let currentPage = 0;
+
+window.addEventListener("scroll", () => {
+    // Avoid error popups showing up when switching pages
+    if (!document.getElementById("page-profile").classList.contains("hide")) {
+        return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (clientHeight + scrollTop >= scrollHeight - 5) {
+        currentPage++;
+
+        const start = currentPage * itemsPerPage;
+        apiCall(`job/feed?start=${start}`, "GET", {})
+            .then((data) => {
+                if (data.length === 0) {
+                    // now more feed items to load
+                    return;
+                }
+                populatePostCards(data, "feed-items");
+            })
+            .catch((error) => {
+                console.error("Error fetching next page of job items:", error);
+            })
+    }
 });
