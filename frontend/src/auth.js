@@ -77,9 +77,13 @@ document.getElementById("login-button").addEventListener("click", (event) => {
         email: email,
         password: password,
     };
-    apiCall("auth/login", "POST", payload).then((data) => {
-        handleLogin(data);
-    });
+    apiCall("auth/login", "POST", payload)
+        .then((data) => {
+            handleLogin(data);
+        })
+        .catch((error) => {
+            showErrorPopup(error);
+        });
 });
 
 document.getElementById("register-button").addEventListener("click", (event) => {
@@ -93,9 +97,13 @@ document.getElementById("register-button").addEventListener("click", (event) => 
         password: password,
         name: name,
     };
-    apiCall("auth/register", "POST", payload).then((data) => {
-        handleLogin(data);
-    });
+    apiCall("auth/register", "POST", payload)
+        .then((data) => {
+            handleLogin(data);
+        })
+        .catch((error) => {
+            showErrorPopup(error);
+        });
 });
 
 document.getElementById("error-popup-close").addEventListener("click", () => {
