@@ -29,15 +29,15 @@ export const locationHandler = () => {
         hide("watch-user-button");
         show("page-profile");
         show("nav-feed");
-    
         // User info
         populateUserInfo(userId)
             .then((data) => {
                 // Jobs
                 const jobs = data.jobs;
                 const containerId = "user-jobs";
+                document.getElementById(containerId).textContent = "";
                 populatePostCards(jobs, containerId);
-    
+
                 // Watchees
                 populateWatchees(data);
             });
