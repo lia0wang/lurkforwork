@@ -57,6 +57,9 @@ export const getUsernameById = (id) => {
         .then((data) => {
             return data.name;
         })
+        .catch((error) => {
+            console.error("Error getting username by id", error);
+        });
 };
 
 export const show = (element) => {

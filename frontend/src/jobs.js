@@ -1,4 +1,4 @@
-import { apiCall, show, hide, fileToDataUrl } from "./helpers.js";
+import { apiCall, show, hide, fileToDataUrl, getUsernameById } from "./helpers.js";
 import { showErrorPopup } from "./auth.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
@@ -82,7 +82,7 @@ export const populatePostCards = (data, containerId) => {
             likeBadge.addEventListener("click", (event) => {
                 event.stopPropagation(); // Prevent button click event from being triggered
                 // pop up people who liked this post box
-                const likedBy = item.likes.map(user => user.userName)
+                const likedBy = item.likes.map(user => user.userId)
                 popupLikeList(likedBy);
             });
             const currentUserId = localStorage.getItem("userId");
@@ -436,11 +436,38 @@ const showPopup = (id) => {
 const popupLikeList = (likedBy) => {
     const likeList = document.getElementById("like-list");
 
-    likedBy.forEach(name => {
+    likedBy.forEach(userId => {
         const listItem = document.createElement("li");
         listItem.className = "list-group-item";
-        listItem.textContent = name;
-        likeList.appendChild(listItem);
+        const listItemSpan = document.createElement("span");
+        getUsernameById(userId).then((name) => {
+            listItemSpan.textContent = name;
+        });
+            
+        listItem.appendChild(listItemSpan);
+        likeList.appendChild(listItem);    
+
+        listItem.addEventListener("click", () => {
+            show("page-profile");
+            hide("page-feed");
+            show("nav-feed");
+            hide("nav-profile");
+            hide("watch-user-button");
+
+            document.getElementById("like-list-popup").style.display = "none";
+            // remove all likes DOM node after close
+            const likeList = document.getElementById("like-list");
+            while (likeList.firstChild) {
+                likeList.removeChild(likeList.firstChild);
+            }
+            
+            // get user id from username
+            populateUserInfo(userId)
+                .then((data) => {
+                    populatePostCards(data.jobs, "user-jobs");
+                    populateWatchees(data);
+                });
+        });
     });
 
     showPopup("like-list-popup");
