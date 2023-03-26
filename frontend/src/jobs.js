@@ -25,6 +25,7 @@ export const populatePostCards = (data, containerId) => {
         colImg.appendChild(imgWrapper);
         const img = document.createElement("img");
         img.src = item.image;
+        img.alt = `Job Image for ${item.title}`;
         img.className = "job-image";
         img.alt = `Image of ${item.title}`;
         imgWrapper.appendChild(img);
@@ -430,6 +431,9 @@ const popupCommentList = (comments, postId) => {
                     return;
                 });
             document.getElementById("comment-input").value = "";
+        } else {
+            showErrorPopup("Please enter a comment.");
+            return;
         }
         // live update comment list
         apiCall('job/feed?start=0', "GET", { "id": postId }).then((data) => {
