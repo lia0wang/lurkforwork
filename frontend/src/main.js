@@ -51,11 +51,11 @@ document.getElementById("nav-logout").addEventListener("click", () => {
 });
 
 document.getElementById("nav-profile").addEventListener("click", () => {
-    show("page-profile");
     hide("page-feed");
-    show("nav-feed");
     hide("nav-profile");
     hide("watch-user-button");
+    show("page-profile");
+    show("nav-feed");
 
     // User info
     const userId = localStorage.getItem("userId");
@@ -127,17 +127,17 @@ document.getElementById("watch-button").addEventListener("click", () => {
         turnon: turnon,
     };
     apiCall("user/watch", "PUT", payload);
-    
-    populateUserInfo(currentUserId)
-    .then((data) => {
-        // Jobs
-        const jobs = data.jobs;
-        const containerId = "user-jobs";
-        populatePostCards(jobs, containerId);
 
-        // Watchees
-        populateWatchees(data);
-    });
+    populateUserInfo(currentUserId)
+        .then((data) => {
+            // Jobs
+            const jobs = data.jobs;
+            const containerId = "user-jobs";
+            populatePostCards(jobs, containerId);
+
+            // Watchees
+            populateWatchees(data);
+        });
 });
 
 document.getElementById("watch-user-button").addEventListener("click", () => {
@@ -190,6 +190,38 @@ const updateUrl = (url) => {
     const fragment = url.split("#")[1];
     history.pushState({}, "", `#${fragment}`);
 };
+
+// Infinite scroll
+let currentPage = 0;
+const itemsPerPage = 5;
+
+window.addEventListener("scroll", () => {
+    const containerId = "feed-items";
+    
+    // Avoid error popups showing up when switching pages
+    if (!document.getElementById("page-profile").classList.contains("hide")) {
+        return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (clientHeight + scrollTop >= scrollHeight - 5) {
+        currentPage++;
+
+        const start = currentPage * itemsPerPage;
+        apiCall(`job/feed?start=${start}`, "GET", {})
+            .then((data) => {
+                if (data.length === 0) {
+                    // showErrorPopup("No more jobs to show");
+                    return;
+                }
+                populatePostCards(data, containerId);
+            })
+            .catch((error) => {
+                console.error("Error fetching next page of job items:", error);
+            })
+    }    
+});
+
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
 if (localStorage.getItem("token")) {

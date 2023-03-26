@@ -5,7 +5,9 @@ import { populateUserInfo, populateWatchees } from "./users.js";
 let currentJobId = null;
 
 export const populatePostCards = (data, containerId) => {
-    document.getElementById(containerId).textContent = "";
+    if (document.getElementById("page-feed").classList.contains("hide")) {
+        document.getElementById(containerId).textContent = "";
+    }
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";

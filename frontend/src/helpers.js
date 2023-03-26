@@ -87,6 +87,7 @@ export const handleLoginUI = () => {
 };
 
 export const handleLogout = () => {
+    document.getElementById("feed-items").textContent = "";
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     show("section-logged-out");
