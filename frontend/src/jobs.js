@@ -8,7 +8,7 @@ export const populatePostCards = (data, containerId) => {
     // if (document.getElementById("page-feed").classList.contains("hide")) {
     // }
     document.getElementById(containerId).textContent = "";
-    
+
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
@@ -156,7 +156,7 @@ export const populatePostCards = (data, containerId) => {
                         populatePostCards(newUserData.jobs, "user-jobs");
                     });
             });
-        
+
             const deleteButton = document.createElement("button");
             deleteButton.className = "btn btn-outline-danger btn-sm";
             actionsRow.appendChild(deleteButton);
@@ -287,6 +287,69 @@ export const pollFeed = () => {
             }
         })
 };
+
+let allJobsPostHash = null;
+
+const getAllJobData = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        let allJobData = [];
+        const fetchJobData = (startIdx) => {
+          return apiCall(`job/feed?start=${startIdx}`, "GET", {}).then((jobData) => {
+                if (jobData && jobData.length > 0) {
+                    allJobData.push(...jobData);
+                    return fetchJobData(startIdx + 5);
+                } else {
+                    return allJobData;
+                }
+            });
+        };
+
+        fetchJobData(0)
+            .then((allJobData) => {
+                if (allJobsPostHash === null) {
+                    allJobsPostHash = jsonHash(allJobData);
+                }
+                resolve(allJobData);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+      } catch (error) {
+            console.error("Error fetching job data:", error);
+            reject(error);
+      }
+    });
+  };
+
+// check if a user is watching posted a new job
+export const pollNotification = () => {
+    getAllJobData()
+    .then ((allJobData) => {
+            console.log(allJobsPostHash);
+            if (jsonHash(allJobData) !== allJobsPostHash) {
+                allJobsPostHash = jsonHash(allJobData);
+                // use notification API to show a notification
+                const showNotification = () => {
+                    const notification = new Notification("New Job Posted from Lurkforwork!" , {
+                        body: "A user you are watching has posted a new job",
+                    });
+                    notification.onclick = () => {
+                        window.focus();
+                    }
+                };
+                if (Notification.permission !== 'granted') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            showNotification();
+                        }
+                    });
+                } else {
+                    showNotification();
+                }
+            }
+        });
+}
 
 // hash json data
 const jsonHash = (data) => {

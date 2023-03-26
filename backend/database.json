@@ -1,24 +1,16 @@
 {
   "users": {
-    "10648": {
-      "email": "dsf",
-      "name": "sadf",
-      "password": "123",
-      "watcheeUserIds": {
-        "10648": true,
-        "14910": true,
-        "40027": true,
-        "46912": true,
-        "65676": true,
-        "78555": true
-      }
+    "65687": {
+      "email": "betty@email.com",
+      "name": "Betty",
+      "password": "cardigan",
+      "watcheeUserIds": {}
     },
-    "14910": {
+    "95112": {
       "email": "augustine@email.com",
       "name": "Augustine",
       "password": "august",
       "watcheeUserIds": {
-        "65676": true,
         "78555": true,
         "99513": true
       }
@@ -32,8 +24,7 @@
         "14910": true,
         "40027": true,
         "46912": true,
-        "78555": true,
-        "99513": true
+        "78555": true
       }
     },
     "46912": {
@@ -41,62 +32,27 @@
       "name": "James",
       "password": "betty",
       "watcheeUserIds": {
-        "14910": true,
-        "78555": true
-      }
-    },
-    "65676": {
-      "email": "2",
-      "name": "2",
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqEH7M5YTBfxYnzWhhY_lQa09lZ-Rtar50vw&usqp=CAU",
-      "password": "2",
-      "watcheeUserIds": {
-        "10648": true,
-        "14910": true,
-        "40027": true,
-        "46912": true,
-        "78555": true,
-        "99513": true
-      }
-    },
-    "78555": {
-      "email": "betty@email.com",
-      "name": "Betty",
-      "password": "cardigan",
-      "watcheeUserIds": {
-        "10648": true,
-        "14910": true,
-        "40027": true,
-        "46912": true,
-        "65676": true,
-        "78555": true
-      }
-    },
-    "99513": {
-      "email": "1",
-      "name": "1",
-      "password": "1",
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqEH7M5YTBfxYnzWhhY_lQa09lZ-Rtar50vw&usqp=CAU",
-      "watcheeUserIds": {
-        "10648": true,
-        "40027": true,
-        "46912": true,
-        "78555": true,
-        "99513": true
+        "65687": true,
+        "95112": true
       }
     }
   },
   "posts": {
-    "302091": {
-      "id": "302091",
-      "creatorId": 99513,
-      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqEH7M5YTBfxYnzWhhY_lQa09lZ-Rtar50vw&usqp=CAU",
-      "title": "COO for cupcake factory",
+    "865058": {
+      "id": "865058",
+      "creatorId": 97467,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+      "title": "Hello Kitty Director",
       "start": "2011-10-05T14:48:00.000Z",
       "description": "Dedicated technical wizard with a passion and interest in human relationships",
       "createdAt": "2023-03-22T04:46:06.377Z",
       "likes": {},
-      "comments": []
+      "comments": [
+        {
+          "userId": "99513",
+          "comment": "dsadas"
+        }
+      ]
     },
     "464751": {
       "id": "464751",
@@ -107,7 +63,8 @@
       "description": "Resonate Solution CEO",
       "createdAt": "2023-03-22T01:28:54.141Z",
       "likes": {
-        "65676": true
+        "65676": true,
+        "99513": true
       },
       "comments": [
         {
@@ -121,6 +78,10 @@
         {
           "userId": "65676",
           "comment": "jj"
+        },
+        {
+          "userId": "65676",
+          "comment": "aaa"
         }
       ]
     },
@@ -146,25 +107,14 @@
       "likes": {},
       "comments": [
         {
-          "userId": "14910",
-          "comment": "1"
+          "userId": "65687",
+          "comment": "Hello there"
         },
         {
-          "userId": "14910",
-          "comment": "jj"
+          "userId": "95112",
+          "comment": "Hello there2"
         }
       ]
-    },
-    "694799": {
-      "id": "694799",
-      "creatorId": 99513,
-      "image": "https://pic.baike.soso.com/ugc/baikepic2/28328/cut-20180503165145-681476724_jpg_942_628_66579.jpg/1284",
-      "title": "COO for cupcake factory",
-      "start": "2011-10-05T14:48:00.000Z",
-      "description": "Dedicated technical wizard with a passion and interest in human relationships",
-      "createdAt": "2023-03-22T04:34:23.318Z",
-      "likes": {},
-      "comments": []
     }
   },
   "nextMessageId": 1
