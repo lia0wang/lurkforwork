@@ -372,59 +372,6 @@ const popupLikeList = (likedBy) => {
     showPopup("like-list-popup");
 };
 
-const updateJob = () => {
-    const title = document.getElementById("job-title").value;
-    const startDate = document.getElementById("job-start-date").value;
-    const description = document.getElementById("job-description").value;
-    const imageFile = document.getElementById("job-image").files[0];
-
-    if (title && startDate && description && imageFile) {
-        return fileToDataUrl(imageFile)
-            .then((imageData) => {
-                const requestBody = {
-                    "title": title,
-                    "image": imageData,
-                    "start": startDate,
-                    "description": description
-                };
-
-                let response;
-                if (currentJobId === -1) { // create new job
-                    return apiCall("job", "POST", requestBody).then((resp) => {
-                        response = resp;
-                        if (response) {
-                            // Close the popup
-                            document.getElementById("add-job-popup").style.display = "none";
-                            populateFeed();
-                        } else {
-                            // Handle error
-                            showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
-                        }
-                    });
-                } else { // update existing job
-                    requestBody.id = currentJobId;
-                    return apiCall("job", "PUT", requestBody).then((resp) => {
-                        response = resp;
-                        if (response) {
-                            // Close the popup
-                            document.getElementById("add-job-popup").style.display = "none";
-                            populateFeed();
-                        } else {
-                            // Handle error
-                            showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
-                        }
-                    });
-                }
-            });
-    } else {
-        // Handle missing fields
-        showErrorPopup("Missing fields");
-        console.log("Missing fields");
-    }
-};
-
 const popupCommentList = (comments, postId) => {
     const commentList = document.getElementById("comment-list");
 
