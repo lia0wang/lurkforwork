@@ -200,60 +200,6 @@ export const populatePostCards = (data, containerId) => {
     return Promise.all(cardPromises);
 };
 
-
-const updateJob = () => {
-    const title = document.getElementById("job-title").value;
-    const startDate = document.getElementById("job-start-date").value;
-    const description = document.getElementById("job-description").value;
-    const imageFile = document.getElementById("job-image").files[0];
-
-    if (title && startDate && description && imageFile) {
-        return fileToDataUrl(imageFile)
-            .then((imageData) => {
-                const requestBody = {
-                    "title": title,
-                    "image": imageData,
-                    "start": startDate,
-                    "description": description
-                };
-
-                let response;
-                if (currentJobId === -1) { // create new job
-                    return apiCall("job", "POST", requestBody).then((resp) => {
-                        response = resp;
-                        if (response) {
-                            // Close the popup
-                            document.getElementById("add-job-popup").style.display = "none";
-                            populateFeed();
-                        } else {
-                            // Handle error
-                            showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
-                        }
-                    });
-                } else { // update existing job
-                    requestBody.id = currentJobId;
-                    return apiCall("job", "PUT", requestBody).then((resp) => {
-                        response = resp;
-                        if (response) {
-                            // Close the popup
-                            document.getElementById("add-job-popup").style.display = "none";
-                            populateFeed();
-                        } else {
-                            // Handle error
-                            showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
-                        }
-                    });
-                }
-            });
-    } else {
-        // Handle missing fields
-        showErrorPopup("Missing fields");
-        console.log("Missing fields");
-    }
-};
-
 let lastFeedLengthHash = null;
 
 export const populateFeed = () => {
@@ -359,7 +305,6 @@ const showPopup = (id) => {
     document.getElementById(id).style.display = "block";
 };
 
-
 const popupLikeList = (likedBy) => {
     const likeList = document.getElementById("like-list");
 
@@ -373,14 +318,58 @@ const popupLikeList = (likedBy) => {
     showPopup("like-list-popup");
 };
 
-document.getElementById("like-close-btn").addEventListener("click", () => {
-    document.getElementById("like-list-popup").style.display = "none";
-    // clear like list
-    const likeList = document.getElementById("like-list");
-    while (likeList.firstChild) {
-        likeList.removeChild(likeList.firstChild);
+const updateJob = () => {
+    const title = document.getElementById("job-title").value;
+    const startDate = document.getElementById("job-start-date").value;
+    const description = document.getElementById("job-description").value;
+    const imageFile = document.getElementById("job-image").files[0];
+
+    if (title && startDate && description && imageFile) {
+        return fileToDataUrl(imageFile)
+            .then((imageData) => {
+                const requestBody = {
+                    "title": title,
+                    "image": imageData,
+                    "start": startDate,
+                    "description": description
+                };
+
+                let response;
+                if (currentJobId === -1) { // create new job
+                    return apiCall("job", "POST", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                } else { // update existing job
+                    requestBody.id = currentJobId;
+                    return apiCall("job", "PUT", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                }
+            });
+    } else {
+        // Handle missing fields
+        showErrorPopup("Missing fields");
+        console.log("Missing fields");
     }
-});
+};
 
 const popupCommentList = (comments, postId) => {
     const commentList = document.getElementById("comment-list");
@@ -451,3 +440,54 @@ const popupCommentList = (comments, postId) => {
 
     showPopup("comment-list-popup");
 };
+
+document.getElementById("like-close-btn").addEventListener("click", () => {
+    document.getElementById("like-list-popup").style.display = "none";
+    // clear like list
+    const likeList = document.getElementById("like-list");
+    while (likeList.firstChild) {
+        likeList.removeChild(likeList.firstChild);
+    }
+});
+
+document.getElementById("comment-close-btn").addEventListener("click", () => {
+    document.getElementById("comment-list-popup").style.display = "none";
+    // remove all comments DOM node after close
+    const commentList = document.getElementById("comment-list");
+    while (commentList.firstChild) {
+        commentList.removeChild(commentList.firstChild);
+    }
+});
+
+document.getElementById("nav-add-job").addEventListener("click", () => {
+    currentJobId = -1;
+    document.getElementById("add-job-popup-title").textContent = "Add a New Job";
+    showPopup("add-job-popup");
+});
+
+document.getElementById("add-job-submit").addEventListener("click", () => {
+    updateJob().then(() => {
+        // live update the user profile page
+        const currentUserId = localStorage.getItem("userId");
+        populateUserInfo(currentUserId)
+            .then((newUserData) => {
+                populatePostCards(newUserData.jobs, "user-jobs");
+                populateWatchees(newUserData);
+            });
+
+        // clear the input in the add-job-popup
+        document.getElementById("add-job-popup").style.display = "none";
+        document.getElementById("job-title").value = "";
+        document.getElementById("job-start-date").value = "";
+        document.getElementById("job-description").value = "";
+        document.getElementById("job-image").value = "";
+    });
+});
+
+document.getElementById("add-job-close-btn").addEventListener("click", () => {
+    document.getElementById("add-job-popup").style.display = "none";
+    document.getElementById("job-title").value = "";
+    document.getElementById("job-start-date").value = "";
+    document.getElementById("job-description").value = "";
+    document.getElementById("job-image").value = "";
+});
