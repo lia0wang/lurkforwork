@@ -5,9 +5,10 @@ import { populateUserInfo, populateWatchees } from "./users.js";
 let currentJobId = null;
 
 export const populatePostCards = (data, containerId) => {
-    if (document.getElementById("page-feed").classList.contains("hide")) {
-        document.getElementById(containerId).textContent = "";
-    }
+    // if (document.getElementById("page-feed").classList.contains("hide")) {
+    // }
+    document.getElementById(containerId).textContent = "";
+    
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
@@ -76,7 +77,7 @@ export const populatePostCards = (data, containerId) => {
             const likeIcon = document.createElement("i"); // font awesome icon
             likeIcon.className = "fas fa-thumbs-up";
             likeButton.appendChild(likeIcon);
-            const likeText = document.createTextNode(" Likes ");
+            const likeText = document.createTextNode(" Like ");
             likeButton.appendChild(likeText);
             const likeBadge = document.createElement("span");
             likeBadge.className = "badge bg-danger like-badge";
@@ -450,54 +451,3 @@ const popupCommentList = (comments, postId) => {
 
     showPopup("comment-list-popup");
 };
-
-
-document.getElementById("comment-close-btn").addEventListener("click", () => {
-    document.getElementById("comment-list-popup").style.display = "none";
-    // remove all comments DOM node after close
-    const commentList = document.getElementById("comment-list");
-    while (commentList.firstChild) {
-        commentList.removeChild(commentList.firstChild);
-    }
-});
-
-document.getElementById("nav-add-job").addEventListener("click", () => {
-    currentJobId = -1;
-    document.getElementById("add-job-popup-title").textContent = "Add a New Job";
-    showPopup("add-job-popup");
-});
-
-document.getElementById("add-job-submit").addEventListener("click", () => {
-    updateJob().then(() => {
-        // live update the user profile page
-        const currentUserId = localStorage.getItem("userId");
-        populateUserInfo(currentUserId)
-            .then((newUserData) => {
-                populatePostCards(newUserData.jobs, "user-jobs");
-                populateWatchees(newUserData);
-            });
-
-        // clear the input in the add-job-popup
-        document.getElementById("add-job-popup").style.display = "none";
-        document.getElementById("job-title").value = "";
-        document.getElementById("job-start-date").value = "";
-        document.getElementById("job-description").value = "";
-        document.getElementById("job-image").value = "";
-    });
-});
-
-document.getElementById("add-job-close-btn").addEventListener("click", () => {
-    document.getElementById("add-job-popup").style.display = "none";
-    document.getElementById("job-title").value = "";
-    document.getElementById("job-start-date").value = "";
-    document.getElementById("job-description").value = "";
-    document.getElementById("job-image").value = "";
-});
-
-document.getElementById("nav-feed").addEventListener("click", () => {
-    show("page-feed");
-    hide("page-profile");
-    show("nav-profile");
-    show("watch-user-button");
-    hide("nav-feed");
-});
