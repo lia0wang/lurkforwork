@@ -1,5 +1,9 @@
+import { apiCall, show, hide } from "./helpers.js";
+import { emailValidator, passwordValidator, nameValidator, showErrorPopup } from "./auth.js";
 import { populatePostCards } from "./jobs.js";
-import { apiCall, getUsernameById, hide, show } from "./helpers.js";
+import "./dropZone.js";
+
+//////////////////////////////////////////////////////// POPULATE USER PROFILE //////////////////////////////////////////////////////////
 
 export const populateUserInfo = (userId) => {
     const payload = {
@@ -13,7 +17,7 @@ export const populateUserInfo = (userId) => {
             // User info
             const userAvatarElement = document.getElementById("user-avatar");
             userAvatarElement.style.backgroundImage = `url(${data.image})`;
-            userAvatarElement.alt = `${data.name}'s avatar`;
+            userAvatarElement.setAttribute("alt", `${data.name}'s Avatar`);
 
             const userIdElement = document.getElementById("user-id");
             userIdElement.textContent = `#${data.id}`;
@@ -40,7 +44,7 @@ export const populateUserInfo = (userId) => {
                 console.log(data.watcheeUserIds);
                 console.log(cachedUserID);
                 // if the cachedUserId is not in the currentUser's watcheeUserIds, show "unwatch"
-                watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch": "watch";
+                watchButton.textContent = (data.watcheeUserIds.includes(cachedUserID)) ? "unwatch" : "watch";
                 show("watch-button-container");
                 hide("edit-profile-button-container");
             }
@@ -108,3 +112,102 @@ export const populateWatchees = (data) => {
         });
     }
 };
+
+//////////////////////////////////////////////////////// USERS MAIN //////////////////////////////////////////////////////////
+
+document.getElementById("nav-profile").addEventListener("click", () => {
+    hide("page-feed");
+    hide("nav-profile");
+    hide("watch-user-button");
+    show("page-profile");
+    show("nav-feed");
+
+    // User info
+    const userId = localStorage.getItem("userId");
+    populateUserInfo(userId)
+        .then((data) => {
+            // Jobs
+            const jobs = data.jobs;
+            const containerId = "user-jobs";
+            populatePostCards(jobs, containerId);
+
+            // Watchees
+            populateWatchees(data);
+        });
+});
+
+document.getElementById("edit-profile-button").addEventListener("click", () => {
+    const userAvatar = document.getElementById("user-avatar");
+    const userName = document.getElementById("user-name");
+    const userEmail = document.getElementById("user-email");
+
+    const email = prompt("Enter your new email:");
+    if (!emailValidator(email)) {
+        showErrorPopup("Email format should be: example@domain.com");
+        return false;
+    }
+    userEmail.textContent = `${email}`;
+
+    const password = prompt("Enter your new password:");
+    if (!passwordValidator(password)) {
+        showErrorPopup("Password should be at least 8 characters long and contain at least one uppercase letter and one number");
+        return false;
+    }
+
+    const name = prompt("Enter your new name:");
+    if (!nameValidator(name)) {
+        showErrorPopup("Name should be between 2 and 30 characters");
+        return false;
+    }
+    userName.textContent = `${name}`;
+
+    const image = prompt("Enter your new image URL:");
+    userAvatar.style.backgroundImage = `url(${image})`;
+    userAvatar.setAttribute("alt", `${name}'s Avatar`);
+
+    const payload = {
+        email: email,
+        password: password,
+        name: name,
+        image: image,
+    };
+
+    apiCall("user", "PUT", payload);
+});
+
+document.getElementById("watch-button").addEventListener("click", () => {
+    const currentUserId = document.getElementById("user-id").textContent.slice(1); // #10648 -> 10648
+    const turnon = (document.getElementById("watch-button").textContent === "watch") ? true : false;
+    console.log(currentUserId, turnon);
+
+    const payload = {
+        id: currentUserId,
+        turnon: turnon,
+    };
+    apiCall("user/watch", "PUT", payload);
+
+    populateUserInfo(currentUserId)
+        .then((data) => {
+            // Jobs
+            const jobs = data.jobs;
+            const containerId = "user-jobs";
+            populatePostCards(jobs, containerId);
+
+            // Watchees
+            populateWatchees(data);
+        });
+});
+
+document.getElementById("watch-user-button").addEventListener("click", () => {
+    const targetUserEmail = prompt("Enter the email of the user:");
+    if (!emailValidator(targetUserEmail)) {
+        showErrorPopup("Email format should be: example@domain.com");
+        return;
+    }
+
+    const payload = {
+        email: targetUserEmail,
+        turnon: true,
+    };
+    apiCall("user/watch", "PUT", payload);
+});
