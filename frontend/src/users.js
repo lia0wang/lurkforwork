@@ -103,7 +103,7 @@ export const populateWatchees = (data) => {
             // Populate the profile page with the watchee's info
             populateUserInfo(watcheeId)
                 .then((data) => {
-                    document.getElementById(containerId).textContent = "";
+                    document.getElementById("user-jobs").textContent = "";
                     populatePostCards(data.jobs, "user-jobs");
                     populateWatchees(data);
                 });

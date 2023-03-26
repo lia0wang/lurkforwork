@@ -196,13 +196,6 @@ export const populatePostCards = (data, containerId) => {
                 document.getElementById("job-title").value = item.title;
                 document.getElementById("job-description").value = item.description;
                 document.getElementById("job-start-date").value = item.start;
-                // live update the user profile page
-                const currentUserId = localStorage.getItem("userId");
-                populateUserInfo(currentUserId)
-                    .then((newUserData) => {
-                        document.getElementById(containerId).textContent = "";
-                        populatePostCards(newUserData.jobs, "user-jobs");
-                    });
             });
 
             const deleteButton = document.createElement("button");
@@ -218,7 +211,7 @@ export const populatePostCards = (data, containerId) => {
                         return populateUserInfo(currentUserId);
                     })
                     .then((newUserData) => {
-                        document.getElementById(containerId).textContent = "";
+                        document.getElementById("user-jobs").textContent = "";
                         populatePostCards(newUserData.jobs, "user-jobs");
                     })
             });
@@ -273,6 +266,12 @@ const updateJob = () => {
                             // Close the popup
                             document.getElementById("add-job-popup").style.display = "none";
                             populateFeed();
+                            // live update the user profile page
+                            populateUserInfo(localStorage.getItem("userId"))
+                            .then((newUserData) => {
+                                document.getElementById("user-jobs").textContent = "";
+                                populatePostCards(newUserData.jobs, "user-jobs");
+                            });
                         } else {
                             // Handle error
                             showErrorPopup(response.error);
@@ -287,6 +286,12 @@ const updateJob = () => {
                             // Close the popup
                             document.getElementById("add-job-popup").style.display = "none";
                             populateFeed();
+                            // live update the user profile page
+                            populateUserInfo(localStorage.getItem("userId"))
+                            .then((newUserData) => {
+                                document.getElementById("user-jobs").textContent = "";
+                                populatePostCards(newUserData.jobs, "user-jobs");
+                            });
                         } else {
                             // Handle error
                             showErrorPopup(response.error);
@@ -423,7 +428,7 @@ const popupCommentList = (comments, postId) => {
 
             populateUserInfo(comment.userId)
                 .then((data) => {
-                    document.getElementById(containerId).textContent = "";
+                    document.getElementById("feed-items").textContent = "";
                     populatePostCards(data.jobs, "user-jobs");
                     populateWatchees(data);
                 });
