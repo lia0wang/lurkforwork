@@ -3,6 +3,57 @@ import { showErrorPopup } from "./auth.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
 let currentJobId = null;
+let lastFeedContentHash = null;
+let lastNumFeedItems = null;
+let currentPage = 0;
+const itemsPerPage = 5;
+
+//////////////////////////////////////////////////////// POPULATE JOB FEED //////////////////////////////////////////////////////////
+
+// avoid concurrent calls to populateFeed
+let populateFeedLock = false;
+export const populateFeed = () => {
+    if (populateFeedLock) {
+        // Return immediately if the function is already running
+        return;
+    }
+    populateFeedLock = true;
+    const scrollPosition = {
+        x: window.pageXOffset || document.documentElement.scrollLeft,
+        y: window.pageYOffset || document.documentElement.scrollTop,
+    };
+    const containerId = "feed-items";
+    apiCall("job/feed?start=0", "GET", {})
+        .then((data) => {
+            localStorage.setItem("feed", JSON.stringify(data));
+            currentPage = 0; // reset page number
+            lastFeedContentHash = jsonHash(data);
+            document.getElementById(containerId).textContent = "";
+            populatePostCards(data, containerId)
+                .then(() => {
+                    // keep the scroll position after populating the feed
+                    window.scrollTo({
+                        top: scrollPosition.y,
+                        left: scrollPosition.x,
+                        behavior: 'instant'
+                    });
+                });
+            populateFeedLock = false;
+        })
+        .catch(() => {
+            // if is offline or there's an error from the API, use cached data
+            const cachedData = localStorage.getItem("feed");
+            if (cachedData) {
+                const containerId = "feed-items";
+                const data = JSON.parse(cachedData);
+                document.getElementById(containerId).textContent = "";
+                populatePostCards(data, containerId);
+            } else {
+                console.error("No cached data available");
+            }
+            populateFeedLock = false;
+        });
+};
 
 export const populatePostCards = (data, containerId) => {
     const cardPromises = data.map((item) => {
@@ -149,6 +200,7 @@ export const populatePostCards = (data, containerId) => {
                 const currentUserId = localStorage.getItem("userId");
                 populateUserInfo(currentUserId)
                     .then((newUserData) => {
+                        document.getElementById(containerId).textContent = "";
                         populatePostCards(newUserData.jobs, "user-jobs");
                     });
             });
@@ -166,6 +218,7 @@ export const populatePostCards = (data, containerId) => {
                         return populateUserInfo(currentUserId);
                     })
                     .then((newUserData) => {
+                        document.getElementById(containerId).textContent = "";
                         populatePostCards(newUserData.jobs, "user-jobs");
                     })
             });
@@ -183,6 +236,7 @@ export const populatePostCards = (data, containerId) => {
 
                     populateUserInfo(item.creatorId)
                         .then((data) => {
+                            document.getElementById(containerId).textContent = "";
                             populatePostCards(data.jobs, "user-jobs");
                             populateWatchees(data);
                         });
@@ -248,42 +302,257 @@ const updateJob = () => {
     }
 };
 
-let lastFeedLengthHash = null;
-
-export const populateFeed = () => {
-    const scrollPosition = {
-        x: window.pageXOffset || document.documentElement.scrollLeft,
-        y: window.pageYOffset || document.documentElement.scrollTop,
-    };
-    const containerId = "feed-items";
-    apiCall("job/feed?start=0", "GET", {})
+const getCreatorUsername = (id) => {
+    return apiCall(`user`, "GET", { userId: id })
         .then((data) => {
-            localStorage.setItem("feed", JSON.stringify(data));
-            currentPage = 0; // reset page number
-            document.getElementById(containerId).textContent = "";
-            lastFeedLengthHash = jsonHash(data);
-            populatePostCards(data, containerId)
-                .then(() => {
-                    // keep the scroll position after populating the feed
-                    window.scrollTo({
-                        top: scrollPosition.y,
-                        left: scrollPosition.x,
-                        behavior: 'instant'
-                    });
-                });
+            localStorage.setItem(`user_${id}`, JSON.stringify(data.name));
+            return data.name;
         })
-        .catch(() => {
-            // if is offline or there's an error from the API, use cached data
-            const cachedData = localStorage.getItem("feed");
+        .catch(() => { // offline
+            const cachedData = localStorage.getItem(`user_${id}`);
             if (cachedData) {
-                const containerId = "feed-items";
-                const data = JSON.parse(cachedData);
-                populatePostCards(data, containerId);
-            } else {
-                console.error("No cached data available");
+                return JSON.parse(cachedData);
             }
+            return "Unknown";
         });
+};;
+
+const formatTime = (createAt) => {
+    const now = new Date();
+    const createdDate = new Date(createAt);
+    const diffInMs = now - createdDate;
+    const diffInMinutes = diffInMs / (1000 * 60);
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+
+    if (diffInHours < 24 && diffInHours > 0) {
+        const hours = Math.floor(diffInHours);
+        const minutes = Math.floor(diffInMinutes % 60);
+        return `${hours} hours ${minutes} minutes ago`;
+    } else {
+        const day = createdDate.getDate();
+        const month = createdDate.getMonth() + 1;
+        const year = createdDate.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
 };
+
+const createInfoTextElement = (text, className) => {
+    const paragraph = document.createElement("p");
+    paragraph.className = className;
+    paragraph.textContent = text;
+    return paragraph;
+};
+
+const toggleLikeButton = (button, liked) => {
+    if (liked) {
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-primary');
+    } else {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-outline-primary');
+    }
+};
+
+const showPopup = (id) => {
+    document.getElementById(id).style.display = "block";
+};
+
+const popupLikeList = (likedBy) => {
+    const likeList = document.getElementById("like-list");
+
+    likedBy.forEach(userId => {
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item";
+        const listItemSpan = document.createElement("span");
+        getUsernameById(userId).then((name) => {
+            listItemSpan.textContent = name;
+        });
+
+        listItem.appendChild(listItemSpan);
+        likeList.appendChild(listItem);
+
+        listItem.addEventListener("click", () => {
+            show("page-profile");
+            hide("page-feed");
+            show("nav-feed");
+            hide("nav-profile");
+            hide("watch-user-button");
+
+            document.getElementById("like-list-popup").style.display = "none";
+            // remove all likes DOM node after close
+            const likeList = document.getElementById("like-list");
+            while (likeList.firstChild) {
+                likeList.removeChild(likeList.firstChild);
+            }
+
+            // get user id from username
+            populateUserInfo(userId)
+                .then((data) => {
+                    populatePostCards(data.jobs, "user-jobs");
+                    populateWatchees(data);
+                });
+        });
+    });
+
+    showPopup("like-list-popup");
+};
+
+const popupCommentList = (comments, postId) => {
+    const commentList = document.getElementById("comment-list");
+
+    comments.forEach(comment => {
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item";
+        const listItemSpan = document.createElement("span");
+        listItemSpan.textContent = comment.userName + ': ' + comment.comment;
+        listItem.appendChild(listItemSpan);
+
+        listItem.addEventListener("click", () => {
+            show("page-profile");
+            hide("page-feed");
+            show("nav-feed");
+            hide("nav-profile");
+            hide("watch-user-button");
+
+            document.getElementById("comment-list-popup").style.display = "none";
+            // remove all comments DOM node after close
+            const commentList = document.getElementById("comment-list");
+            while (commentList.firstChild) {
+                commentList.removeChild(commentList.firstChild);
+            }
+
+            populateUserInfo(comment.userId)
+                .then((data) => {
+                    document.getElementById(containerId).textContent = "";
+                    populatePostCards(data.jobs, "user-jobs");
+                    populateWatchees(data);
+                });
+        });
+
+        commentList.appendChild(listItem);
+    });
+
+    // Remove existing event listeners (if any)
+    const oldCommentButton = document.getElementById("comment-button");
+    const newCommentButton = oldCommentButton.cloneNode(true);
+    oldCommentButton.parentNode.replaceChild(newCommentButton, oldCommentButton);
+
+    newCommentButton.addEventListener("click", () => {
+        const inputComment = document.getElementById("comment-input").value;
+        if (inputComment) {
+            apiCall(`job/comment`, "POST", { "id": postId, "comment": inputComment })
+                .catch(() => { // offline
+                    showErrorPopup("No internet connection.");
+                    return;
+                });
+            document.getElementById("comment-input").value = "";
+        } else {
+            showErrorPopup("Please enter a comment.");
+            return;
+        }
+        // live update comment list
+        apiCall('job/feed?start=0', "GET", { "id": postId }).then((data) => {
+            document.getElementById("comment-list-popup").style.display = "none";
+            // remove all comments DOM node after close
+            const commentList = document.getElementById("comment-list");
+            while (commentList.firstChild) {
+                commentList.removeChild(commentList.firstChild);
+            }
+            const updatedComments = data.find((item) => item.id === postId).comments;
+            popupCommentList(updatedComments, postId);
+        });
+    });
+
+    showPopup("comment-list-popup");
+};
+
+document.getElementById("like-close-btn").addEventListener("click", () => {
+    document.getElementById("like-list-popup").style.display = "none";
+    // clear like list
+    const likeList = document.getElementById("like-list");
+    while (likeList.firstChild) {
+        likeList.removeChild(likeList.firstChild);
+    }
+});
+
+document.getElementById("comment-close-btn").addEventListener("click", () => {
+    document.getElementById("comment-list-popup").style.display = "none";
+    // remove all comments DOM node after close
+    const commentList = document.getElementById("comment-list");
+    while (commentList.firstChild) {
+        commentList.removeChild(commentList.firstChild);
+    }
+});
+
+document.getElementById("nav-add-job").addEventListener("click", () => {
+    currentJobId = -1;
+    document.getElementById("add-job-popup-title").textContent = "Add a New Job";
+    showPopup("add-job-popup");
+});
+
+document.getElementById("add-job-submit").addEventListener("click", () => {
+    updateJob().then(() => {
+        // live update the user profile page
+        const currentUserId = localStorage.getItem("userId");
+        populateUserInfo(currentUserId)
+            .then((newUserData) => {
+                populateFeed(newUserData.jobs, "user-jobs");
+                populateWatchees(newUserData);
+            });
+
+        // clear the input in the add-job-popup
+        document.getElementById("add-job-popup").style.display = "none";
+        document.getElementById("job-title").value = "";
+        document.getElementById("job-start-date").value = "";
+        document.getElementById("job-description").value = "";
+        document.getElementById("job-image").value = "";
+    });
+});
+
+document.getElementById("add-job-close-btn").addEventListener("click", () => {
+    document.getElementById("add-job-popup").style.display = "none";
+    document.getElementById("job-title").value = "";
+    document.getElementById("job-start-date").value = "";
+    document.getElementById("job-description").value = "";
+    document.getElementById("job-image").value = "";
+});
+
+document.getElementById("nav-feed").addEventListener("click", () => {
+    show("page-feed");
+    hide("page-profile");
+    show("nav-profile");
+    show("watch-user-button");
+    hide("nav-feed");
+});
+
+////////////////////////////////////////////////////// INFINITE SCROLLING //////////////////////////////////////////////////////////
+
+window.addEventListener("scroll", () => {
+    // Avoid error popups showing up when switching pages
+    if (!document.getElementById("page-profile").classList.contains("hide")) {
+        return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (clientHeight + scrollTop >= scrollHeight - 5) {
+        currentPage++;
+
+        const start = currentPage * itemsPerPage;
+        apiCall(`job/feed?start=${start}`, "GET", {})
+            .then((data) => {
+                if (data.length === 0) {
+                    // now more feed items to load
+                    return;
+                }
+                populatePostCards(data, "feed-items");
+            })
+            .catch((error) => {
+                console.error("Error fetching next page of job items:", error);
+            })
+    }
+});
+
+//////////////////////////////////////////////////////// POLLING //////////////////////////////////////////////////////////
 
 // check if the server data base for /job/feed is updated by checking its hash value
 // if so call populateFeed
@@ -291,13 +560,11 @@ export const pollFeed = () => {
     apiCall("job/feed?start=0", "GET", {})
         .then((data) => {
             // compare the hash value data with the last time we called populateFeed
-            if (jsonHash(data) !== lastFeedLengthHash) {
+            if (jsonHash(data) !== lastFeedContentHash) {
                 populateFeed();
             }
         })
 };
-
-let lastNumFeedItems = null;
 
 const getNumFeedItems = () => {
     return new Promise((resolve, reject) => {
@@ -377,255 +644,3 @@ const jsonHash = (data) => {
     }
     return hash;
 }
-
-const getCreatorUsername = (id) => {
-    return apiCall(`user`, "GET", { userId: id })
-        .then((data) => {
-            localStorage.setItem(`user_${id}`, JSON.stringify(data.name));
-            return data.name;
-        })
-        .catch(() => { // offline
-            const cachedData = localStorage.getItem(`user_${id}`);
-            if (cachedData) {
-                return JSON.parse(cachedData);
-            }
-            return "Unknown";
-        });
-};;
-
-const formatTime = (createAt) => {
-    const now = new Date();
-    const createdDate = new Date(createAt);
-    const diffInMs = now - createdDate;
-    const diffInMinutes = diffInMs / (1000 * 60);
-    const diffInHours = diffInMs / (1000 * 60 * 60);
-
-    if (diffInHours < 24 && diffInHours > 0) {
-        const hours = Math.floor(diffInHours);
-        const minutes = Math.floor(diffInMinutes % 60);
-        return `${hours} hours ${minutes} minutes ago`;
-    } else {
-        const day = createdDate.getDate();
-        const month = createdDate.getMonth() + 1;
-        const year = createdDate.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-};
-
-const createInfoTextElement = (text, className) => {
-    const paragraph = document.createElement("p");
-    paragraph.className = className;
-    paragraph.textContent = text;
-    return paragraph;
-};
-
-const toggleLikeButton = (button, liked) => {
-    if (liked) {
-        button.classList.remove('btn-outline-primary');
-        button.classList.add('btn-primary');
-    } else {
-        button.classList.remove('btn-primary');
-        button.classList.add('btn-outline-primary');
-    }
-};
-
-const showPopup = (id) => {
-    document.getElementById(id).style.display = "block";
-};
-
-const popupLikeList = (likedBy) => {
-    const likeList = document.getElementById("like-list");
-
-    likedBy.forEach(userId => {
-        const listItem = document.createElement("li");
-        listItem.className = "list-group-item";
-        const listItemSpan = document.createElement("span");
-        getUsernameById(userId).then((name) => {
-            listItemSpan.textContent = name;
-        });
-            
-        listItem.appendChild(listItemSpan);
-        likeList.appendChild(listItem);    
-
-        listItem.addEventListener("click", () => {
-            show("page-profile");
-            hide("page-feed");
-            show("nav-feed");
-            hide("nav-profile");
-            hide("watch-user-button");
-
-            document.getElementById("like-list-popup").style.display = "none";
-            // remove all likes DOM node after close
-            const likeList = document.getElementById("like-list");
-            while (likeList.firstChild) {
-                likeList.removeChild(likeList.firstChild);
-            }
-            
-            // get user id from username
-            populateUserInfo(userId)
-                .then((data) => {
-                    populatePostCards(data.jobs, "user-jobs");
-                    populateWatchees(data);
-                });
-        });
-    });
-
-    showPopup("like-list-popup");
-};
-
-const popupCommentList = (comments, postId) => {
-    const commentList = document.getElementById("comment-list");
-
-    comments.forEach(comment => {
-        const listItem = document.createElement("li");
-        listItem.className = "list-group-item";
-        const listItemSpan = document.createElement("span");
-        listItemSpan.textContent = comment.userName + ': ' + comment.comment;
-        listItem.appendChild(listItemSpan);
-
-        listItem.addEventListener("click", () => {
-            show("page-profile");
-            hide("page-feed");
-            show("nav-feed");
-            hide("nav-profile");
-            hide("watch-user-button");
-
-            document.getElementById("comment-list-popup").style.display = "none";
-            // remove all comments DOM node after close
-            const commentList = document.getElementById("comment-list");
-            while (commentList.firstChild) {
-                commentList.removeChild(commentList.firstChild);
-            }
-
-            populateUserInfo(comment.userId)
-                .then((data) => {
-                    populatePostCards(data.jobs, "user-jobs");
-                    populateWatchees(data);
-                });
-        });
-
-        commentList.appendChild(listItem);
-    });
-
-
-    // Remove existing event listeners (if any)
-    const oldCommentButton = document.getElementById("comment-button");
-    const newCommentButton = oldCommentButton.cloneNode(true);
-    oldCommentButton.parentNode.replaceChild(newCommentButton, oldCommentButton);
-
-    newCommentButton.addEventListener("click", () => {
-        const inputComment = document.getElementById("comment-input").value;
-        if (inputComment) {
-            apiCall(`job/comment`, "POST", { "id": postId, "comment": inputComment })
-                .catch(() => { // offline
-                    showErrorPopup("No internet connection.");
-                    return;
-                });
-            document.getElementById("comment-input").value = "";
-        } else {
-            showErrorPopup("Please enter a comment.");
-            return;
-        }
-        // live update comment list
-        apiCall('job/feed?start=0', "GET", { "id": postId }).then((data) => {
-            document.getElementById("comment-list-popup").style.display = "none";
-            // remove all comments DOM node after close
-            const commentList = document.getElementById("comment-list");
-            while (commentList.firstChild) {
-                commentList.removeChild(commentList.firstChild);
-            }
-            const updatedComments = data.find((item) => item.id === postId).comments;
-            popupCommentList(updatedComments, postId);
-        });
-    });
-
-    showPopup("comment-list-popup");
-};
-
-document.getElementById("like-close-btn").addEventListener("click", () => {
-    document.getElementById("like-list-popup").style.display = "none";
-    // clear like list
-    const likeList = document.getElementById("like-list");
-    while (likeList.firstChild) {
-        likeList.removeChild(likeList.firstChild);
-    }
-});
-
-document.getElementById("comment-close-btn").addEventListener("click", () => {
-    document.getElementById("comment-list-popup").style.display = "none";
-    // remove all comments DOM node after close
-    const commentList = document.getElementById("comment-list");
-    while (commentList.firstChild) {
-        commentList.removeChild(commentList.firstChild);
-    }
-});
-
-document.getElementById("nav-add-job").addEventListener("click", () => {
-    currentJobId = -1;
-    document.getElementById("add-job-popup-title").textContent = "Add a New Job";
-    showPopup("add-job-popup");
-});
-
-document.getElementById("add-job-submit").addEventListener("click", () => {
-    updateJob().then(() => {
-        // live update the user profile page
-        const currentUserId = localStorage.getItem("userId");
-        populateUserInfo(currentUserId)
-            .then((newUserData) => {
-                populatePostCards(newUserData.jobs, "user-jobs");
-                populateWatchees(newUserData);
-            });
-
-        // clear the input in the add-job-popup
-        document.getElementById("add-job-popup").style.display = "none";
-        document.getElementById("job-title").value = "";
-        document.getElementById("job-start-date").value = "";
-        document.getElementById("job-description").value = "";
-        document.getElementById("job-image").value = "";
-    });
-});
-
-document.getElementById("add-job-close-btn").addEventListener("click", () => {
-    document.getElementById("add-job-popup").style.display = "none";
-    document.getElementById("job-title").value = "";
-    document.getElementById("job-start-date").value = "";
-    document.getElementById("job-description").value = "";
-    document.getElementById("job-image").value = "";
-});
-
-document.getElementById("nav-feed").addEventListener("click", () => {
-    show("page-feed");
-    hide("page-profile");
-    show("nav-profile");
-    show("watch-user-button");
-    hide("nav-feed");
-});
-
-// Infinite scroll
-const itemsPerPage = 5;
-let currentPage = 0;
-
-window.addEventListener("scroll", () => {
-    // Avoid error popups showing up when switching pages
-    if (!document.getElementById("page-profile").classList.contains("hide")) {
-        return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (clientHeight + scrollTop >= scrollHeight - 5) {
-        currentPage++;
-
-        const start = currentPage * itemsPerPage;
-        apiCall(`job/feed?start=${start}`, "GET", {})
-            .then((data) => {
-                if (data.length === 0) {
-                    // now more feed items to load
-                    return;
-                }
-                populatePostCards(data, "feed-items");
-            })
-            .catch((error) => {
-                console.error("Error fetching next page of job items:", error);
-            })
-    }
-});
