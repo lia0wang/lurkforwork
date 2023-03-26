@@ -1,3 +1,9 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// helpers.js:                                                                                              //
+//      Helper functions for Lurkforwork, including API call, file to URL convertor and log in/out UI       //
+// and polling state handler.                                                                               //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import { BACKEND_PORT, POLLING_INTERVAL_TIME } from "./config.js";
 import { showErrorPopup } from "./auth.js";
 import { populateFeed, pollFeed, pollNotification } from "./jobs.js";

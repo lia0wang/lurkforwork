@@ -1,3 +1,8 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// users.js:                                                                                                 //
+//      Entry file for script, import frontend functions from other files. Maintain login/logout UI status.  //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import { handleLoginUI } from "./helpers.js";
 import { populateFeed } from "./jobs.js";
 import "./dropZone.js";

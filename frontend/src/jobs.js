@@ -1,16 +1,23 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// jobs.js:                                                                                                 //
+//      Contains Jobs related functions, jobs related UI control, including populate feed, like, comment    //
+// functionalities, polling, notifications, page switch handling and scrolling.                             //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import { apiCall, show, hide, fileToDataUrl, getUsernameById } from "./helpers.js";
 import { showErrorPopup } from "./auth.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
+// client state variables
 let currentJobId = null;
 let lastFeedContentHash = null;
 let lastNumFeedItems = null;
 let currentPage = 0;
+
 const itemsPerPage = 5;
 
 //////////////////////////////////////////////////////// POPULATE JOB FEED //////////////////////////////////////////////////////////
 
-// avoid concurrent calls to populateFeed
 let populateFeedLock = false;
 export const populateFeed = () => {
     if (populateFeedLock) {

@@ -1,9 +1,14 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// users.js:                                                                                                 //
+//      Contains user profile related functions, including populate user file, watch functionalities, and UI //
+// profile UI control.                                                                                       //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import { apiCall, show, hide } from "./helpers.js";
 import { emailValidator, passwordValidator, nameValidator, showErrorPopup } from "./auth.js";
 import { populateFeed, populatePostCards } from "./jobs.js";
 
-//////////////////////////////////////////////////////// POPULATE USER PROFILE //////////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////// POPULATE USER PROFILE ////////////////////////////////////////////
 export const populateUserInfo = (userId) => {
     const payload = {
         userId: userId,

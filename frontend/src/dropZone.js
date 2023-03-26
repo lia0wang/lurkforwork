@@ -1,3 +1,8 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// dropZone.js:                                                                                             //
+//      Contains image drop zone related UI behaviour, highlight zone while user is dragging an image       //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const dropZone = document.getElementById("drop-zone");
 
 dropZone.addEventListener("dragover", (event) => {

@@ -1,3 +1,8 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// router.js:                                                                                               //
+//      Controls the functionalities of fragment based URL routing.                                         //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import { hide, show } from "./helpers.js";
 import { populatePostCards } from "./jobs.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
