@@ -1,11 +1,13 @@
-import { apiCall, fileToDataUrl, hide, show } from "./helpers.js";
+import { apiCall, show, hide, fileToDataUrl } from "./helpers.js";
 import { showErrorPopup } from "./auth.js";
 import { populateUserInfo, populateWatchees } from "./users.js";
 
 let currentJobId = null;
 
 export const populatePostCards = (data, containerId) => {
-    document.getElementById(containerId).textContent = "";
+    if (document.getElementById("page-feed").classList.contains("hide")) {
+        document.getElementById(containerId).textContent = "";
+    }
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
@@ -25,6 +27,7 @@ export const populatePostCards = (data, containerId) => {
         img.src = item.image;
         img.alt = `Job Image for ${item.title}`;
         img.className = "job-image";
+        img.alt = `Image of ${item.title}`;
         imgWrapper.appendChild(img);
 
         const colBody = document.createElement("div");
@@ -95,17 +98,17 @@ export const populatePostCards = (data, containerId) => {
                         // live update like count and UI
                         populateFeed();
                     })
-                    .catch(() => {
-                        showErrorPopup("No internet connection");
-                    });
+                        .catch(() => {
+                            showErrorPopup("No internet connection");
+                        });
                 } else {
                     apiCall(`job/like`, "PUT", { "id": item.id, "turnon": true }).then(() => {
                         // live update like count and UI
                         populateFeed();
                     })
-                    .catch(() => {
-                        showErrorPopup("No internet connection");
-                    });
+                        .catch(() => {
+                            showErrorPopup("No internet connection");
+                        });
                 }
             });
 
@@ -196,6 +199,60 @@ export const populatePostCards = (data, containerId) => {
     return Promise.all(cardPromises);
 };
 
+
+const updateJob = () => {
+    const title = document.getElementById("job-title").value;
+    const startDate = document.getElementById("job-start-date").value;
+    const description = document.getElementById("job-description").value;
+    const imageFile = document.getElementById("job-image").files[0];
+
+    if (title && startDate && description && imageFile) {
+        return fileToDataUrl(imageFile)
+            .then((imageData) => {
+                const requestBody = {
+                    "title": title,
+                    "image": imageData,
+                    "start": startDate,
+                    "description": description
+                };
+
+                let response;
+                if (currentJobId === -1) { // create new job
+                    return apiCall("job", "POST", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                } else { // update existing job
+                    requestBody.id = currentJobId;
+                    return apiCall("job", "PUT", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                }
+            });
+    } else {
+        // Handle missing fields
+        showErrorPopup("Missing fields");
+        console.log("Missing fields");
+    }
+};
+
 let lastFeedLengthHash = null;
 
 export const populateFeed = () => {
@@ -236,12 +293,12 @@ const jsonHash = (data) => {
     const jsonString = JSON.stringify(data);
     let hash = 0;
     if (jsonString.length === 0) {
-      return hash;
+        return hash;
     }
     for (let i = 0; i < jsonString.length; i++) {
-      const char = jsonString.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+        const char = jsonString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
 }
@@ -437,55 +494,10 @@ document.getElementById("add-job-close-btn").addEventListener("click", () => {
     document.getElementById("job-image").value = "";
 });
 
-const updateJob = () => {
-    const title = document.getElementById("job-title").value;
-    const startDate = document.getElementById("job-start-date").value;
-    const description = document.getElementById("job-description").value;
-    const imageFile = document.getElementById("job-image").files[0];
-
-    if (title && startDate && description && imageFile) {
-        return fileToDataUrl(imageFile)
-            .then((imageData) => {
-                const requestBody = {
-                    "title": title,
-                    "image": imageData,
-                    "start": startDate,
-                    "description": description
-                };
-
-                let response;
-                if (currentJobId === -1) { // create new job
-                    return apiCall("job", "POST", requestBody).then((resp) => {
-                        response = resp;
-                        if (response) {
-                            // Close the popup
-                            document.getElementById("add-job-popup").style.display = "none";
-                            populateFeed();
-                        } else {
-                            // Handle error
-                            showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
-                        }
-                    });
-                } else { // update existing job
-                    requestBody.id = currentJobId;
-                    return apiCall("job", "PUT", requestBody).then((resp) => {
-                        response = resp;
-                        if (response) {
-                            // Close the popup
-                            document.getElementById("add-job-popup").style.display = "none";
-                            populateFeed();
-                        } else {
-                            // Handle error
-                            showErrorPopup(response.error);
-                            console.log(`Error: ${response.error}`);
-                        }
-                    });
-                }
-            });
-    } else {
-        // Handle missing fields
-        showErrorPopup("Missing fields");
-        console.log("Missing fields");
-    }
-};
+document.getElementById("nav-feed").addEventListener("click", () => {
+    show("page-feed");
+    hide("page-profile");
+    show("nav-profile");
+    show("watch-user-button");
+    hide("nav-feed");
+});

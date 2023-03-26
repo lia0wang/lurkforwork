@@ -8,44 +8,57 @@
 }
 
 .nav-item:hover {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 /* Header Section */
+header {
+    position: fixed;
+    top: 0;
+    z-index: 999;
+    width: 100%;
+}
+
 header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-#error-popup-container {
-    text-align: center;
-    color: #fff;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    background-color: #21252a;
-    width: 300px;
-    height: 150px;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 9999;
-    border-radius: 10px;
-    display: flex;    
+@media screen and (max-width: 480px) {
+    #website-name {
+        display: none;
+    }
+
+    header .container {
+        flex-direction: column;
+        font-size: medium;
+    }
+
+    #watch-user-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+
+    #watch-user-button button {
+        margin: auto;
+        font-size: smaller;
+    }
 }
 
 /* Register CSS */
 #page-register form {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin-right: -50%;
-	transform: translate(-50%, -50%);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     max-height: calc(100vh - 200px);
 }
 
@@ -73,14 +86,14 @@ header .container {
 
 /* Login CSS */
 #page-login form {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin-right: -50%;
-	transform: translate(-50%, -50%);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     max-height: calc(100vh - 200px);
 }
 
@@ -108,14 +121,14 @@ header .container {
 
 /* Logged In Page CSS */
 #section-logged-in .container {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin-right: -50%;
-	transform: translate(-50%, -50%);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .drop-zone {
@@ -130,7 +143,6 @@ header .container {
 .drop-zone--over {
     border-color: #007bff;
 }
-
 
 /* Footer CSS */
 footer {
