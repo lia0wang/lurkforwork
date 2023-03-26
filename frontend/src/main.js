@@ -40,35 +40,35 @@ const updateUrl = (url) => {
 };
 
 // Infinite scroll
-let currentPage = 0;
-const itemsPerPage = 5;
+// let currentPage = 0;
+// const itemsPerPage = 5;
 
-window.addEventListener("scroll", () => {
-    const containerId = "feed-items";
+// window.addEventListener("scroll", () => {
+//     const containerId = "feed-items";
 
-    // Avoid error popups showing up when switching pages
-    if (!document.getElementById("page-profile").classList.contains("hide")) {
-        return;
-    }
+//     // Avoid error popups showing up when switching pages
+//     if (!document.getElementById("page-profile").classList.contains("hide")) {
+//         return;
+//     }
 
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (clientHeight + scrollTop >= scrollHeight - 5) {
-        currentPage++;
+//     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+//     if (clientHeight + scrollTop >= scrollHeight - 5) {
+//         currentPage++;
 
-        const start = currentPage * itemsPerPage;
-        apiCall(`job/feed?start=${start}`, "GET", {})
-            .then((data) => {
-                if (data.length === 0) {
-                    // showErrorPopup("No more jobs to show");
-                    return;
-                }
-                populatePostCards(data, containerId);
-            })
-            .catch((error) => {
-                console.error("Error fetching next page of job items:", error);
-            })
-    }
-});
+//         const start = currentPage * itemsPerPage;
+//         apiCall(`job/feed?start=${start}`, "GET", {})
+//             .then((data) => {
+//                 if (data.length === 0) {
+//                     // showErrorPopup("No more jobs to show");
+//                     return;
+//                 }
+//                 populatePostCards(data, containerId);
+//             })
+//             .catch((error) => {
+//                 console.error("Error fetching next page of job items:", error);
+//             })
+//     }
+// });
 
 //////////////////////////////////////////////////////// Main //////////////////////////////////////////////////////////
 
