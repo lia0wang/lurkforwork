@@ -1,6 +1,6 @@
 import { apiCall, show, hide } from "./helpers.js";
 import { emailValidator, passwordValidator, nameValidator, showErrorPopup } from "./auth.js";
-import { populatePostCards } from "./jobs.js";
+import { populateFeed, populatePostCards } from "./jobs.js";
 
 //////////////////////////////////////////////////////// POPULATE USER PROFILE //////////////////////////////////////////////////////////
 
@@ -183,7 +183,7 @@ document.getElementById("watch-button").addEventListener("click", () => {
         turnon: turnon,
     };
     apiCall("user/watch", "PUT", payload);
-
+    populateFeed();
     populateUserInfo(currentUserId)
         .then((data) => {
             // Jobs
