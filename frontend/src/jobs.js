@@ -5,9 +5,10 @@ import { populateUserInfo, populateWatchees } from "./users.js";
 let currentJobId = null;
 
 export const populatePostCards = (data, containerId) => {
-    if (document.getElementById("page-feed").classList.contains("hide")) {
-        document.getElementById(containerId).textContent = "";
-    }
+    // if (document.getElementById("page-feed").classList.contains("hide")) {
+    // }
+    document.getElementById(containerId).textContent = "";
+    
     const cardPromises = data.map((item) => {
         const feedDom = document.createElement("div");
         feedDom.className = "card mb-3 feed-card";
@@ -76,7 +77,7 @@ export const populatePostCards = (data, containerId) => {
             const likeIcon = document.createElement("i"); // font awesome icon
             likeIcon.className = "fas fa-thumbs-up";
             likeButton.appendChild(likeIcon);
-            const likeText = document.createTextNode(" Likes ");
+            const likeText = document.createTextNode(" Like ");
             likeButton.appendChild(likeText);
             const likeBadge = document.createElement("span");
             likeBadge.className = "badge bg-danger like-badge";
@@ -358,7 +359,6 @@ const showPopup = (id) => {
     document.getElementById(id).style.display = "block";
 };
 
-
 const popupLikeList = (likedBy) => {
     const likeList = document.getElementById("like-list");
 
@@ -372,14 +372,58 @@ const popupLikeList = (likedBy) => {
     showPopup("like-list-popup");
 };
 
-document.getElementById("like-close-btn").addEventListener("click", () => {
-    document.getElementById("like-list-popup").style.display = "none";
-    // clear like list
-    const likeList = document.getElementById("like-list");
-    while (likeList.firstChild) {
-        likeList.removeChild(likeList.firstChild);
+const updateJob = () => {
+    const title = document.getElementById("job-title").value;
+    const startDate = document.getElementById("job-start-date").value;
+    const description = document.getElementById("job-description").value;
+    const imageFile = document.getElementById("job-image").files[0];
+
+    if (title && startDate && description && imageFile) {
+        return fileToDataUrl(imageFile)
+            .then((imageData) => {
+                const requestBody = {
+                    "title": title,
+                    "image": imageData,
+                    "start": startDate,
+                    "description": description
+                };
+
+                let response;
+                if (currentJobId === -1) { // create new job
+                    return apiCall("job", "POST", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                } else { // update existing job
+                    requestBody.id = currentJobId;
+                    return apiCall("job", "PUT", requestBody).then((resp) => {
+                        response = resp;
+                        if (response) {
+                            // Close the popup
+                            document.getElementById("add-job-popup").style.display = "none";
+                            populateFeed();
+                        } else {
+                            // Handle error
+                            showErrorPopup(response.error);
+                            console.log(`Error: ${response.error}`);
+                        }
+                    });
+                }
+            });
+    } else {
+        // Handle missing fields
+        showErrorPopup("Missing fields");
+        console.log("Missing fields");
     }
-});
+};
 
 const popupCommentList = (comments, postId) => {
     const commentList = document.getElementById("comment-list");
@@ -451,6 +495,14 @@ const popupCommentList = (comments, postId) => {
     showPopup("comment-list-popup");
 };
 
+document.getElementById("like-close-btn").addEventListener("click", () => {
+    document.getElementById("like-list-popup").style.display = "none";
+    // clear like list
+    const likeList = document.getElementById("like-list");
+    while (likeList.firstChild) {
+        likeList.removeChild(likeList.firstChild);
+    }
+});
 
 document.getElementById("comment-close-btn").addEventListener("click", () => {
     document.getElementById("comment-list-popup").style.display = "none";
